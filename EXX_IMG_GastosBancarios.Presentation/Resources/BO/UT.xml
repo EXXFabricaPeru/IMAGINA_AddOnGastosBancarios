@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<BOM>
+  <BO>
+    <AdmInfo>
+      <Object>153</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserTablesMD>
+      <row>
+        <TableName>EXD_OMCB</TableName>
+        <TableDescription>GB: Conf. cod bancarios</TableDescription>
+        <TableType>bott_MasterData</TableType>
+      </row>
+    </UserTablesMD>
+  </BO>
+
+  <BO>
+    <AdmInfo>
+      <Object>153</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserTablesMD>
+      <row>
+        <TableName>EXD_MCB1</TableName>
+        <TableDescription>GB: Conf. cod banc det</TableDescription>
+        <TableType>bott_MasterDataLines</TableType>
+      </row>
+    </UserTablesMD>
+  </BO>
+
+  <BO>
+    <AdmInfo>
+      <Object>153</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserTablesMD>
+      <row>
+        <TableName>EXD_OCBN</TableName>
+        <TableDescription>GB: Conciliación bancaria</TableDescription>
+        <TableType>bott_Document</TableType>
+      </row>
+    </UserTablesMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>153</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserTablesMD>
+      <row>
+        <TableName>EXD_CBN1</TableName>
+        <TableDescription>GB: Conciliación bancaria deta</TableDescription>
+        <TableType>bott_DocumentLines</TableType>
+      </row>
+    </UserTablesMD>
+  </BO>
+</BOM>

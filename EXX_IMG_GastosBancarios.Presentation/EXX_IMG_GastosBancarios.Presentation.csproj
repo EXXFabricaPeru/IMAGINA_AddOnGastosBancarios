@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9B0EDC8B-D1FC-4556-816E-F9A3DC6DBF0F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EXX_IMG_GastosBancarios.Presentation</RootNamespace>
+    <AssemblyName>EXX_IMG_GastosBancarios.Presentation</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\x64\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>EXX_IMG_GastosBancarios.Presentation.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EXX_Metadata.BL">
+      <HintPath>..\..\..\Exxis\MetaData\SDK\EXX_Metadata\Test\bin\Debug\EXX_Metadata.BL.dll</HintPath>
+    </Reference>
+    <Reference Include="EXX_SBOAddon.Utiles.Entities">
+      <HintPath>..\..\..\MIO\JF_SBOAddon.Utiles\JF_SBOAddon.Utiles.Viewer\bin\Release\EXX_SBOAddon.Utiles.Entities.dll</HintPath>
+    </Reference>
+    <Reference Include="EXX_SBOAddon.Utiles.Extensions">
+      <HintPath>..\..\..\MIO\JF_SBOAddon.Utiles\JF_SBOAddon.Utiles.Viewer\bin\Release\EXX_SBOAddon.Utiles.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="EXX_SBOAddon.Utiles.Utilities">
+      <HintPath>..\..\..\MIO\JF_SBOAddon.Utiles\JF_SBOAddon.Utiles.Viewer\bin\Release\EXX_SBOAddon.Utiles.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="SAPBusinessOneSDK" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Forms\FormConciliacionBancaria.b1f.cs">
+      <DependentUpon>FormConciliacionBancaria.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormMaestroCodigosBancarios.b1f.cs">
+      <DependentUpon>FormMaestroCodigosBancarios.b1f</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Menu.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EXX_IMG_GastosBancarios.Domain.Entities\EXX_IMG_GastosBancarios.Domain.Entities.csproj">
+      <Project>{A7FE1685-C61B-4CEF-93E9-276975CBFF75}</Project>
+      <Name>EXX_IMG_GastosBancarios.Domain.Entities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Forms\FormConciliacionBancaria.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+    <None Include="Forms\FormMaestroCodigosBancarios.b1f">
+      <FormCategory>UserForm</FormCategory>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\BO\UF.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BO\UO.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\BO\UT.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Gif\gif.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Gif\gif.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Gif\Wait.srf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_DATOS_RECONCILIACION.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_OPERACIONES_PENDIENTES.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\SQL\EXD_IMG_CNBN_LISTAR_DATOS_RECONCILIACION.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\SQL\EXD_IMG_CNBN_LISTAR_OPERACIONES_PENDIENTES.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
