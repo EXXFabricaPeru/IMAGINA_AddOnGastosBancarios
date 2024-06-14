@@ -1,4 +1,5 @@
-﻿using EXX_Metadata.BL;
+﻿using EXX_IMG_GastosBancarios.Presentation.Helper;
+using EXX_Metadata.BL;
 using JF_SBOAddon.Utiles.Extensions;
 using SAPbouiCOM.Framework;
 using System;
@@ -33,6 +34,7 @@ namespace EXX_IMG_GastosBancarios.Presentation
                 MDResources.Messages = mostrarMensajes;
                 if (MDResources.loadMetaData(Assembly.GetExecutingAssembly().GetName().Version, Application.SBO_Application, "EXX", "CONBANC"))
                 {
+                    SearchFormatedHelper.Initialize(DIExtensions.Company, Assembly.GetExecutingAssembly().GetName().Version,"EXX", "CONBANC");
                     Menu MyMenu = new Menu();
                     MyMenu.AddMenuItems();
                     oApp.RegisterMenuEventHandler(MyMenu.SBO_Application_MenuEvent);

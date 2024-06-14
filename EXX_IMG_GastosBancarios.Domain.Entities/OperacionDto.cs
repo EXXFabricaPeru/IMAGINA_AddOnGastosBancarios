@@ -18,5 +18,20 @@ namespace EXX_IMG_GastosBancarios.Domain.Entities
         public int NroSecuencia { get; set; }
         public string CodPagoSAP { get; set; }
         public string NroReferencia { get; set; }
+        public string CodProyecto { get; set; }
+        public string CodDim1 { get; set; }
+        public string CodDim2 { get; set; }
+        public string CodDim3 { get; set; }
+        public string CodDim4 { get; set; }
+        public string CodDim5 { get; set; }
+        public string CodParPre { get; set; }
+        public string NomParPre { get; set; }
+        public string CodMPTraBan { get; set; }
+
+        public string Idsucursal { get; set; }
+        public string Idcuenta { get; set; }
+        public string IdBanco { get; set; }
+        public string Idmoneda { get; set; }
+        public string Estado { get; set; }
     }
 }

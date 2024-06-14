@@ -7,13 +7,13 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
-        <Name>COD_EMPRESA</Name>
+        <Name>EXX_CODGB</Name>
         <Type>db_Alpha</Type>
         <Size>10</Size>
-        <Description>Codigo de empresa</Description>
+        <Description>Código de banco</Description>
         <SubType>st_None</SubType>
-        <TableName>@EXD_OMCB</TableName>
-        <EditSize>10</EditSize>
+        <TableName>OVPM</TableName>
+        <EditSize>150</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
     </UserFieldsMD>
@@ -43,12 +43,30 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
+        <Name>COD_EMPRESA</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Codigo de empresa</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
         <Name>COD_CUENTA</Name>
         <Type>db_Alpha</Type>
         <Size>50</Size>
         <Description>Código de cuenta</Description>
         <SubType>st_None</SubType>
-        <TableName>@EXD_OMCB</TableName>
+        <TableName>@EXD_MCB1</TableName>
         <EditSize>50</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
@@ -66,7 +84,7 @@
         <Size>10</Size>
         <Description>Codigo de moneda</Description>
         <SubType>st_None</SubType>
-        <TableName>@EXD_OMCB</TableName>
+        <TableName>@EXD_MCB1</TableName>
         <EditSize>10</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
@@ -140,6 +158,187 @@
         <SubType>st_None</SubType>
         <TableName>@EXD_MCB1</TableName>
         <EditSize>1</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_PROYECTO</Name>
+        <Type>db_Alpha</Type>
+        <Size>50</Size>
+        <Description>Código proyecto</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>50</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM1</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 1</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM2</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 2</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM3</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 3</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM4</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 4</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM5</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 5</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_PARPRE</Name>
+        <Type>db_Alpha</Type>
+        <Size>50</Size>
+        <Description>Código partida presupuestal</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>50</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>NOM_PARPRE</Name>
+        <Type>db_Alpha</Type>
+        <Size>100</Size>
+        <Description>Nombre partida presupuestal</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>100</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_MPTRABAN</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Código med pag transferencia</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+        <LinkedUDO>EXX_MEDPAG</LinkedUDO>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>DES_CUENTA</Name>
+        <Type>db_Alpha</Type>
+        <Size>150</Size>
+        <Description>Cuenta</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_MCB1</TableName>
+        <EditSize>100</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
     </UserFieldsMD>
@@ -277,6 +476,24 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
+        <Name>FECHA_CONT</Name>
+        <Type>db_Date</Type>
+        <Size>8</Size>
+        <Description>Fecha Contabilización</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_OCBN</TableName>
+        <EditSize>8</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
         <Name>SELECCIONADO</Name>
         <Type>db_Alpha</Type>
         <Size>1</Size>
@@ -284,6 +501,150 @@
         <SubType>st_None</SubType>
         <TableName>@EXD_CBN1</TableName>
         <EditSize>1</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_BANCO</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Cod. Banco</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>DES_BANCO</Name>
+        <Type>db_Alpha</Type>
+        <Size>150</Size>
+        <Description>Banco</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>150</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_EMPRESA</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Cod. Empresa</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>DES_EMPRESA</Name>
+        <Type>db_Alpha</Type>
+        <Size>150</Size>
+        <Description>Empresa</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>150</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_CUENTA</Name>
+        <Type>db_Alpha</Type>
+        <Size>100</Size>
+        <Description>Cuenta</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>100</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>DES_CUENTA</Name>
+        <Type>db_Alpha</Type>
+        <Size>100</Size>
+        <Description>Cuenta</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>100</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_MONEDA</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Moneda</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_ESTADO</Name>
+        <Type>db_Alpha</Type>
+        <Size>250</Size>
+        <Description>Estado</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>250</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
     </UserFieldsMD>
@@ -501,6 +862,169 @@
         <TableName>@EXD_CBN1</TableName>
         <EditSize>250</EditSize>
         <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_PROYECTO</Name>
+        <Type>db_Alpha</Type>
+        <Size>50</Size>
+        <Description>Código proyecto</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>50</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM1</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 1</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM2</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 2</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM3</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 3</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM4</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 4</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_DIM5</Name>
+        <Type>db_Alpha</Type>
+        <Size>20</Size>
+        <Description>Código dimensión 5</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>20</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_PARPRE</Name>
+        <Type>db_Alpha</Type>
+        <Size>50</Size>
+        <Description>Código partida presupuestal</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>50</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>NOM_PARPRE</Name>
+        <Type>db_Alpha</Type>
+        <Size>100</Size>
+        <Description>Nombre partida presupuestal</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>100</EditSize>
+        <Mandatory>tNO</Mandatory>
+      </row>
+    </UserFieldsMD>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>152</Object>
+      <Version>2</Version>
+    </AdmInfo>
+    <UserFieldsMD>
+      <row>
+        <Name>COD_MPTRABAN</Name>
+        <Type>db_Alpha</Type>
+        <Size>10</Size>
+        <Description>Código med pag transferencia</Description>
+        <SubType>st_None</SubType>
+        <TableName>@EXD_CBN1</TableName>
+        <EditSize>10</EditSize>
+        <Mandatory>tNO</Mandatory>
+        <LinkedUDO>EXX_MEDPAG</LinkedUDO>
       </row>
     </UserFieldsMD>
   </BO>

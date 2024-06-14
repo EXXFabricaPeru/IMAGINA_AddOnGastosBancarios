@@ -1,133 +1,126 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <BOM>
-	<BO>
-		<AdmInfo>
-			<Object>206</Object>
-		</AdmInfo>
-		<OUDO>
-			<row>
-				<Code>EXD_OMCB</Code>
-				<Name>EXD_OMCB</Name>
-				<TableName>EXD_OMCB</TableName>
-				<TYPE>1</TYPE>
-				<MngSeries>N</MngSeries>
-				<CanDelete>N</CanDelete>
-				<CanClose>N</CanClose>
-				<CanCancel>Y</CanCancel>
-				<CanFind>Y</CanFind>
-				<CanYrTrnsf>N</CanYrTrnsf>
-        <CanDefForm>N</CanDefForm>
-				<CanLog>N</CanLog>
-				<MenuItem>N</MenuItem>
-				<CanNewForm>N</CanNewForm>
-			</row>
-		</OUDO>
-		<UDO1>
-			<row>
-				<TableName>EXD_MCB1</TableName>
-			</row>
-		</UDO1>
-		<UDO2>
-			<row>
-				<ColAlias>Code</ColAlias>
-				<ColumnDesc>Code</ColumnDesc>
-			</row>
-			<row>
-				<ColAlias>Name</ColAlias>
-				<ColumnDesc>Name</ColumnDesc>
-			</row>
-			<row>
-				<ColAlias>U_COD_EMPRESA</ColAlias>
-				<ColumnDesc>Codigo de empresa</ColumnDesc>
-			</row>
-			<row>
-				<ColAlias>U_COD_BANCO</ColAlias>
-				<ColumnDesc>Código de banco</ColumnDesc>
-			</row>
-			<row>
-				<ColAlias>U_COD_CUENTA</ColAlias>
-				<ColumnDesc>Código de cuenta</ColumnDesc>
-			</row>
-    	<row>
-				<ColAlias>U_COD_MONEDA</ColAlias>
-				<ColumnDesc>Codigo de moneda</ColumnDesc>
-			</row>
-		</UDO2>
-	</BO>
-	<BO>
-		<AdmInfo>
-			<Object>206</Object>
-		</AdmInfo>
-		<OUDO>
-			<row>
-				<Code>EXD_OCBN</Code>
-				<Name>EXD_OCBN</Name>
-				<TableName>EXD_OCBN</TableName>
-				<TYPE>3</TYPE>
-				<MngSeries>Y</MngSeries>
-				<CanFind>Y</CanFind>
-				<CanYrTrnsf>N</CanYrTrnsf>
-				<CanDefForm>Y</CanDefForm>
-				<CanLog>N</CanLog>
-				<CanDelete>N</CanDelete>
-				<CanCancel>Y</CanCancel>
-				<CanClose>Y</CanClose>
-			</row>
-		</OUDO>
-		<UDO1>
-			<row>
-				<TableName>EXD_CBN1</TableName>
-			</row>
-		</UDO1>
-		<UDO2>
+  <BO>
+    <AdmInfo>
+      <Object>206</Object>
+    </AdmInfo>
+    <OUDO>
       <row>
-				<ColAlias>DocEntry</ColAlias>
-				<ColumnDesc>DocEntry</ColumnDesc>
-			</row>
-			<row>
-				<ColAlias>DocNum</ColAlias>
-				<ColumnDesc>DocNum</ColumnDesc>
-			</row>
+        <Code>EXD_OMCB</Code>
+        <Name>EXD_OMCB</Name>
+        <TableName>EXD_OMCB</TableName>
+        <TYPE>1</TYPE>
+        <MngSeries>N</MngSeries>
+        <CanDelete>N</CanDelete>
+        <CanClose>N</CanClose>
+        <CanCancel>N</CanCancel>
+        <CanFind>Y</CanFind>
+        <CanYrTrnsf>N</CanYrTrnsf>
+        <CanDefForm>N</CanDefForm>
+        <CanLog>N</CanLog>
+        <MenuItem>N</MenuItem>
+        <CanNewForm>N</CanNewForm>
+      </row>
+    </OUDO>
+    <UDO1>
+      <row>
+        <TableName>EXD_MCB1</TableName>
+      </row>
+    </UDO1>
+    <UDO2>
+      <row>
+        <ColAlias>Code</ColAlias>
+        <ColumnDesc>Code</ColumnDesc>
+      </row>
+      <row>
+        <ColAlias>Name</ColAlias>
+        <ColumnDesc>Name</ColumnDesc>
+      </row>
+      <row>
+        <ColAlias>U_COD_BANCO</ColAlias>
+        <ColumnDesc>Código de banco</ColumnDesc>
+      </row>
+    </UDO2>
+  </BO>
+  <BO>
+    <AdmInfo>
+      <Object>206</Object>
+    </AdmInfo>
+    <OUDO>
+      <row>
+        <Code>EXD_OCBN</Code>
+        <Name>EXD_OCBN</Name>
+        <TableName>EXD_OCBN</TableName>
+        <TYPE>3</TYPE>
+        <MngSeries>Y</MngSeries>
+        <CanFind>Y</CanFind>
+        <CanYrTrnsf>N</CanYrTrnsf>
+        <CanDefForm>Y</CanDefForm>
+        <CanLog>N</CanLog>
+        <CanDelete>N</CanDelete>
+        <CanCancel>N</CanCancel>
+        <CanClose>N</CanClose>
+      </row>
+    </OUDO>
+    <UDO1>
+      <row>
+        <TableName>EXD_CBN1</TableName>
+      </row>
+    </UDO1>
+    <UDO2>
+      <row>
+        <ColAlias>DocEntry</ColAlias>
+        <ColumnDesc>DocEntry</ColumnDesc>
+      </row>
+      <row>
+        <ColAlias>DocNum</ColAlias>
+        <ColumnDesc>DocNum</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>CreateDate</ColAlias>
-				<ColumnDesc>CreateDate</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>CreateDate</ColAlias>
+        <ColumnDesc>CreateDate</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>UpdateDate</ColAlias>
-				<ColumnDesc>UpdateDate</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>UpdateDate</ColAlias>
+        <ColumnDesc>UpdateDate</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>U_ESTADO</ColAlias>
-				<ColumnDesc>Estado</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>U_ESTADO</ColAlias>
+        <ColumnDesc>Estado</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>U_COD_EMPRESA</ColAlias>
-				<ColumnDesc>Código de empresa</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>U_COD_EMPRESA</ColAlias>
+        <ColumnDesc>Código de empresa</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>U_COD_BANCO</ColAlias>
-				<ColumnDesc>Código de banco</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>U_COD_BANCO</ColAlias>
+        <ColumnDesc>Código de banco</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>U_COD_CUENTA</ColAlias>
-				<ColumnDesc>Código de cuenta</ColumnDesc>
-			</row>
-    
-  		<row>
-				<ColAlias>U_FECHA_DESDE</ColAlias>
-				<ColumnDesc>Facha desdea</ColumnDesc>
-			</row>
+      <row>
+        <ColAlias>U_COD_CUENTA</ColAlias>
+        <ColumnDesc>Código de cuenta</ColumnDesc>
+      </row>
 
-			<row>
-				<ColAlias>U_FECHA_HASTA</ColAlias>
-				<ColumnDesc>Fecha hasta</ColumnDesc>
-			</row>
-		</UDO2>
-	</BO>
+      <row>
+        <ColAlias>U_FECHA_DESDE</ColAlias>
+        <ColumnDesc>Facha desdea</ColumnDesc>
+      </row>
+
+      <row>
+        <ColAlias>U_FECHA_HASTA</ColAlias>
+        <ColumnDesc>Fecha hasta</ColumnDesc>
+      </row>
+
+      <row>
+        <ColAlias>U_FECHA_CONT</ColAlias>
+        <ColumnDesc>Fecha contabilización</ColumnDesc>
+      </row>
+    </UDO2>
+  </BO>
 </BOM>

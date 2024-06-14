@@ -105,8 +105,24 @@ namespace EXX_IMG_GastosBancarios.Presentation
                 }
                 else if (pVal.BeforeAction && pVal.MenuUID == "GBMenu2")
                 {
-                    formConciBanc = new FormConciliacionBancaria();
-                    formConciBanc.Show();
+                    //var formAux = Application.SBO_Application.Forms.ActiveForm;
+                    try
+                    {
+                        if (!FormConciliacionBancaria.isOpen)
+                        {
+                            formConciBanc = new FormConciliacionBancaria();
+                            formConciBanc.Show();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        formConciBanc = new FormConciliacionBancaria();
+                        formConciBanc.Show();
+                    }
+                    
+                        
+                    
+
                 }
             }
             catch (Exception ex)
@@ -114,6 +130,5 @@ namespace EXX_IMG_GastosBancarios.Presentation
                 Application.SBO_Application.MessageBox(ex.ToString(), 1, "Ok", "", "");
             }
         }
-
     }
 }
