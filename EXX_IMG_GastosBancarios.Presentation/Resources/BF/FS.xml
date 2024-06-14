@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<BOM>
+  <FS>
+    <sqlQuery>select "Account" , * from DSC1 where "BankCode" = $["@EXD_OMCB"."U_COD_BANCO"] and "Branch" = $["@EXD_MCB1"."U_COD_EMPRESA"]</sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CuentaBancoGet</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_17</ColumnID>
+    <userQueryId></userQueryId>
+  </FS>
+  <FS>
+    <sqlQuery>select "GLAccount" from DSC1 where "BankCode" = $["@EXD_OMCB"."U_COD_BANCO"] and "Branch" = $["@EXD_MCB1"."U_COD_EMPRESA"] and "Account" = $["@EXD_MCB1"."U_DES_CUENTA"]</sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CodCuentaBancoSet</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_15</ColumnID>
+    <userQueryId></userQueryId>
+  </FS>
+</BOM>

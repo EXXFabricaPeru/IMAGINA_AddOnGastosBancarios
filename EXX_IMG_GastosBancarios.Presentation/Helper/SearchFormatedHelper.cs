@@ -11,6 +11,7 @@ using System.IO;
 using System.Resources;
 using System.Collections;
 using EXX_IMG_GastosBancarios.Domain.Entities.BF;
+using System.Xml;
 
 namespace EXX_IMG_GastosBancarios.Presentation.Helper
 {
@@ -65,14 +66,14 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
         private static void CreateFormattedSearchByList(int idCategory, Company oCompany)
         {
-            var list = SetListFormattedSearch();
+            var list = GetListFormattedSearch();//SetListFormattedSearch();
 
             foreach (var item in list)
             {
                 DesassingFomattedSearch(oCompany, item.FormID, item.ItemID, item.ColumnID);
-                DropIfExistFormattedSearch(oCompany, item.sqlQuery, item.name, idCategory);
+                DropIfExistFormattedSearch(oCompany, item.sqlQuery, item.Name, idCategory);
 
-                var idFs = CreateFormattedSearch(oCompany, item.sqlQuery, item.name, idCategory);
+                var idFs = CreateFormattedSearch(oCompany, item.sqlQuery, item.Name, idCategory);
 
                 AssignCreateFormattedSearch(oCompany, item.FormID, item.ItemID, item.ColumnID, idFs);
 
@@ -89,7 +90,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 if (idAPPFS != -1)
                 {
                     formattedSearch.GetByKey(idAPPFS);
-                    int ret=formattedSearch.Remove();
+                    int ret = formattedSearch.Remove();
                     if (ret == 0)
                     {
                         Application.SBO_Application.SetStatusWarningMessage("DesassingFomattedSearch  BF OK ");
@@ -123,7 +124,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                     UserQueries userQuery = (UserQueries)oCompany.GetBusinessObject(BoObjectTypes.oUserQueries);
                     userQuery.GetByKey(id, idCategory);
 
-                    int ret=userQuery.Remove();
+                    int ret = userQuery.Remove();
 
                     if (ret == 0)
                     {
@@ -375,7 +376,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                     ColumnID = "Col_17",
                     FormID = "FormMaestroCodigosBancarios",
                     ItemID = "Item_9",
-                    name = "EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CuentaBancoGet",
+                    Name = "EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CuentaBancoGet",
                     sqlQuery = @"select ""Account"" , * from DSC1 where ""BankCode"" = $[""@EXD_OMCB"".""U_COD_BANCO""] and ""Branch"" = $[""@EXD_MCB1"".""U_COD_EMPRESA""]",
                     userQueryId = 0
                 });
@@ -385,7 +386,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                     ColumnID = "Col_15",
                     FormID = "FormMaestroCodigosBancarios",
                     ItemID = "Item_9",
-                    name = "EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CodCuentaBancoSet",
+                    Name = "EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CodCuentaBancoSet",
                     sqlQuery = @"select ""GLAccount"" from DSC1 where ""BankCode"" = $[""@EXD_OMCB"".""U_COD_BANCO""] and ""Branch"" = $[""@EXD_MCB1"".""U_COD_EMPRESA""] and ""Account"" = $[""@EXD_MCB1"".""U_DES_CUENTA""]",
                     userQueryId = 0
                 });
@@ -401,5 +402,61 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
             return null;
 
         }
+
+        public static List<FormattedSearchDto> GetListFormattedSearch()
+        {
+
+            // Ruta al archivo XML
+            string fileName = "Resources/BF/FS.xml";
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            string xmlFile = Path.Combine(baseDirectory, fileName);
+            List<FormattedSearchDto> fsList = new List<FormattedSearchDto>();
+
+            // Verifica si el archivo existe
+            if (File.Exists(xmlFile))
+            {
+                try
+                {
+                    // Crear una instancia de XmlDocument
+                    XmlDocument xmlDoc = new XmlDocument();
+
+                    // Cargar el archivo XML
+                    xmlDoc.Load(xmlFile);
+
+                    // Obtener todos los nodos <FS>
+                    XmlNodeList fsNodes = xmlDoc.SelectNodes("//FS");
+
+                    // Recorrer y procesar los nodos <FS>
+                    foreach (XmlNode node in fsNodes)
+                    {
+                        FormattedSearchDto fs = new FormattedSearchDto
+                        {
+                            sqlQuery = node["sqlQuery"].InnerText,
+                            Name = node["Name"].InnerText,
+                            FormID = node["FormID"].InnerText,
+                            ItemID = node["ItemID"].InnerText,
+                            ColumnID = node["ColumnID"].InnerText,
+                            userQueryId = 0
+                        };
+
+                        fsList.Add(fs);
+                    }
+
+                    return fsList;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                    Console.WriteLine($"Ocurrió un error al leer el archivo XML: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("El archivo XML no existe.");
+                return null;
+            }
+        }
+
     }
 }
