@@ -33,5 +33,9 @@ namespace EXX_IMG_GastosBancarios.Domain.Entities
         public string IdBanco { get; set; }
         public string Idmoneda { get; set; }
         public string Estado { get; set; }
+
+        public string FechaCont { get; set; }
+
+        
     }
 }

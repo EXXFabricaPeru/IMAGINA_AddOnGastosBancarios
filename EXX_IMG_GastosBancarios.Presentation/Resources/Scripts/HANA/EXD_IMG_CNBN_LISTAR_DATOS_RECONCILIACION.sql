@@ -1,4 +1,4 @@
-CREATE  PROCEDURE EXD_IMG_CNBN_LISTAR_DATOS_RECONCILIACION
+CREATE PROCEDURE EXD_IMG_CNBN_LISTAR_DATOS_RECONCILIACION
 (
 	docEntry int
 )
@@ -37,7 +37,7 @@ begin
 	inner join CTE_PAGOS	T2  on T2."DocEntry"		= T0."U_COD_PAGO_SAP"	and T2."ObjType" = T0."U_TIPO_PAGO" and T0."U_COD_CUENTA" = T2."Account"
 	where T1."DocEntry" = docEntry
 	and ifnull(T0."U_SELECCIONADO",'') = 'Y'
-	and T0."U_COD_ESTADO"='Procesado'
-	--and IFNULL(T0."U_COD_PAGO_SAP",0) != 0
+	--and T0."U_COD_ESTADO"='Procesado'
+	and IFNULL(T0."U_COD_PAGO_SAP",0) != 0
 	;
 end;

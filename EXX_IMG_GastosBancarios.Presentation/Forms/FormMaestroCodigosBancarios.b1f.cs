@@ -280,6 +280,12 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
 
                 for (int i = 0; i < mtxCodBancs.VisualRowCount; i++)
                 {
+                    if (string.IsNullOrWhiteSpace(((SAPbouiCOM.ComboBox)mtxCodBancs.GetCellSpecific("Col_14", i + 1)).Value))
+                    {
+                        ((SAPbouiCOM.ComboBox)mtxCodBancs.GetCellSpecific("Col_14", i + 1)).Active = true;
+                        throw new InvalidOperationException("Registre una sucursal");
+                    }
+
                     if (string.IsNullOrWhiteSpace(((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_15", i + 1)).Value))
                     {
                         ((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_15", i + 1)).Active = true;
@@ -690,20 +696,23 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                     SAPbouiCOM.ComboBox comboBoxEmpresa = (SAPbouiCOM.ComboBox)mtxCodBancs.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific;
                     SAPbouiCOM.EditText moneda = (SAPbouiCOM.EditText)mtxCodBancs.Columns.Item("Col_16").Cells.Item(pVal.Row).Specific;
 
-
-                    var codEmp = comboBoxEmpresa.Selected.Value;
-                    var codCta = comboBoxCuenta.Value;
-                    var codBnc = dbsEXD_OMCB.GetValueExt("U_COD_BANCO");
-                    var sqlQry = $"select TX1.\"ActCurr\" from DSC1 TX0 inner join OACT  TX1 on TX0.\"GLAccount\" = TX1.\"AcctCode\"  where TX0.\"BankCode\" = '{codBnc}' and TX0.\"Branch\" = '{codEmp}' and TX0.\"GLAccount\" = '{codCta}'";
-                    var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-                    recSet.DoQuery(sqlQry);
-                    if (!recSet.EoF)
+                    if (!string.IsNullOrEmpty(comboBoxEmpresa.Value))
                     {
-                        moneda.Value = recSet.Fields.Item(0).Value.ToString();
-                        mtxCodBancs.FlushToDataSource();
-                        //dbsEXD_MCB1.SetValueExt("U_COD_MONEDA", recSet.Fields.Item(0).Value.ToString());
+                        var codEmp = comboBoxEmpresa.Selected.Value;
+                        var codCta = comboBoxCuenta.Value;
+                        var codBnc = dbsEXD_OMCB.GetValueExt("U_COD_BANCO");
+                        var sqlQry = $"select TX1.\"ActCurr\" from DSC1 TX0 inner join OACT  TX1 on TX0.\"GLAccount\" = TX1.\"AcctCode\"  where TX0.\"BankCode\" = '{codBnc}' and TX0.\"Branch\" = '{codEmp}' and TX0.\"GLAccount\" = '{codCta}'";
+                        var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                        recSet.DoQuery(sqlQry);
+                        if (!recSet.EoF)
+                        {
+                            moneda.Value = recSet.Fields.Item(0).Value.ToString();
+                            mtxCodBancs.FlushToDataSource();
+                            //dbsEXD_MCB1.SetValueExt("U_COD_MONEDA", recSet.Fields.Item(0).Value.ToString());
 
+                        }
                     }
+                   
 
                 }
 

@@ -67,11 +67,18 @@
     <Reference Include="EXX_SBOAddon.Utiles.Utilities">
       <HintPath>bin\Release\x64\EXX_SBOAddon.Utiles.Utilities.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.1.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.1.0\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="SAPBusinessOneSDK">
       <HintPath>bin\Release\x64\SAPBusinessOneSDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -88,7 +95,9 @@
       <DependentUpon>FormMaestroCodigosBancarios.b1f</DependentUpon>
     </Compile>
     <Compile Include="Helper\Globals.cs" />
+    <Compile Include="Helper\RestHelper.cs" />
     <Compile Include="Helper\SearchFormatedHelper.cs" />
+    <Compile Include="Helper\ServiceLayerHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Menu.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -106,6 +115,7 @@
     <None Include="Forms\FormMaestroCodigosBancarios.b1f">
       <FormCategory>UserForm</FormCategory>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -128,6 +138,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Gif\Wait.srf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_UPDATE_RECON.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_UPDATE_PAGOS.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_DATOS_PAGOS.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scripts\HANA\EXD_IMG_CNBN_LISTAR_DATOS_RECONCILIACION.sql">

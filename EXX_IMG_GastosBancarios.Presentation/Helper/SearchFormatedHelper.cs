@@ -12,6 +12,7 @@ using System.Resources;
 using System.Collections;
 using EXX_IMG_GastosBancarios.Domain.Entities.BF;
 using System.Xml;
+using System.Runtime.InteropServices;
 
 namespace EXX_IMG_GastosBancarios.Presentation.Helper
 {
@@ -19,27 +20,92 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
     {
 
         public static string CategoriesName = "9980. Búsquedas Formateadas Exxis - Gtos Bancarios";
-
-
-        public static void Initialize(Company oCompany, Version version, string companyPrefix, string addonID)
+        private static string TableID = "EXX_SETUP";
+        public static bool versionID = false;
+        public static void Initialize(Company oCompany, Version version, string AddonID, bool validVersion)
         {
 
             Application.SBO_Application.SetStatusWarningMessage("Iniciando Creación de BF");
 
-            //ValidVersion(oCompany, version, companyPrefix, addonID);
+            //if (ValidVersion(oCompany,version, AddonID))
+            if (validVersion)
+            {
+                var IdCategory = CreateCategoryFormattedSearch(CategoriesName, oCompany);
+                //Application.SBO_Application.SetStatusWarningMessage("IdCategory: " + IdCategory);
+                CreateFormattedSearchByList(IdCategory, oCompany);
 
-            var IdCategory = CreateCategoryFormattedSearch(CategoriesName, oCompany);
-            Application.SBO_Application.SetStatusWarningMessage("IdCategory: " + IdCategory);
-            CreateFormattedSearchByList(IdCategory, oCompany);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
+                updateSYSTable(oCompany, AddonID, version, TableID);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
+            }
+
+
         }
-
-        private static bool ValidVersion(Company oCompany, Version version, string companyPrefix, string addonID)
+        private static void updateSYSTable(Company oCompany, string addonID, Version version, string _tableSys)
+        {
+            UserTable userTable = oCompany.UserTables.Item((object)_tableSys);
+            Recordset businessObject = oCompany.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
+            string QueryStr1 = "select * from \"@EXX_SETUP\"";
+            businessObject.DoQuery(QueryStr1);
+            int recordCount = businessObject.RecordCount;
+            string QueryStr2 = QueryStr1 + " where \"U_EXX_ADDN\" = '" + addonID + "'";
+            businessObject.DoQuery(QueryStr2);
+            if (!businessObject.EoF)
+            {
+                if (!userTable.GetByKey(businessObject.Fields.Item((object)"Code").Value.ToString()))
+                    return;
+                userTable.UserFields.Fields.Item((object)"U_EXX_ADDN").Value = (object)addonID;
+                userTable.UserFields.Fields.Item((object)"U_EXX_RUTA").Value = (object)version.ToString();
+                if (userTable.Update() != 0)
+                    throw new InvalidOperationException(string.Format("SYS - TBL:{0} - {1}", (object)oCompany.GetLastErrorCode(), (object)oCompany.GetLastErrorDescription()));
+            }
+            else
+            {
+                userTable.Code = (recordCount + 1).ToString().PadLeft(2, '0');
+                userTable.Name = (recordCount + 1).ToString().PadLeft(2, '0');
+                userTable.UserFields.Fields.Item((object)"U_EXX_ADDN").Value = (object)addonID;
+                userTable.UserFields.Fields.Item((object)"U_EXX_RUTA").Value = (object)version.ToString();
+                if (userTable.Add() != 0)
+                    throw new InvalidOperationException(string.Format("SYS - TBL:{0} - {1}", (object)oCompany.GetLastErrorCode(), (object)oCompany.GetLastErrorDescription()));
+            }
+        }
+        public static void ValidVersionV2(Company oCompany, Version version, string addonID)
         {
             try
             {
+                //Application.SBO_Application.SetStatusWarningMessage("ValidVersionV2");
+                string sQuery;
+                sQuery = $@"select * from ""@EXX_SETUP"" where ""U_EXX_ADDN"" = '{ addonID }'";
+                string str = "";
+                var oRec = (SAPbobsCOM.Recordset)oCompany.GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                oRec.DoQuery(sQuery);
+
+                while (!oRec.EoF)
+                {
+                    str = oRec.Fields.Item("U_EXX_RUTA").Value.ToString();
+                }
+                Marshal.ReleaseComObject((object)oRec);
+                GC.Collect();
+                if (version.ToString() != str)
+                {
+                    versionID = true;
+                }
+
+                versionID = false;
+            }
+            catch (Exception ex)
+            {
+                Application.SBO_Application.SetStatusWarningMessage("ValidVersion Error: " + ex.Message);
+                versionID = false;
+            }
+        }
+        public static bool ValidVersion(Company oCompany, Version version, string addonID)
+        {
+            try
+            {
+                //Application.SBO_Application.SetStatusWarningMessage("ValidVersion333");
                 string sQuery;
                 sQuery = $@"select * from ""@EXX_SETUP"" where ""U_EXX_ADDN"" = '{ addonID }'";
                 string str = "";
@@ -49,7 +115,11 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 while (!oRec.EoF)
                 {
                     str = oRec.Fields.Item("U_EXX_VERS").Value.ToString();
+                    oRec.MoveNext();
                 }
+
+                Marshal.ReleaseComObject((object)oRec);
+                GC.Collect();
 
                 if (version.ToString() != str)
                 {
@@ -58,8 +128,9 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
                 return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Application.SBO_Application.SetStatusWarningMessage("ValidVersion Error: " + ex.Message);
                 return false;
             }
         }
@@ -75,7 +146,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
                 var idFs = CreateFormattedSearch(oCompany, item.sqlQuery, item.Name, idCategory);
 
-                AssignCreateFormattedSearch(oCompany, item.FormID, item.ItemID, item.ColumnID, idFs);
+                AssignCreateFormattedSearch(oCompany, item, idFs);
 
             }
         }
@@ -84,7 +155,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
         {
             try
             {
-                Application.SBO_Application.SetStatusWarningMessage("DesassingFomattedSearch");
+                //Application.SBO_Application.SetStatusWarningMessage("DesassingFomattedSearch");
                 FormattedSearches formattedSearch = (FormattedSearches)company.GetBusinessObject(BoObjectTypes.oFormattedSearches);
                 var idAPPFS = indexFMS(company, FormID, ItemID, ColumnID);
                 if (idAPPFS != -1)
@@ -93,7 +164,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                     int ret = formattedSearch.Remove();
                     if (ret == 0)
                     {
-                        Application.SBO_Application.SetStatusWarningMessage("DesassingFomattedSearch  BF OK ");
+                        //Application.SBO_Application.SetStatusWarningMessage("DesassingFomattedSearch  BF OK ");
                     }
                     else
                     {
@@ -128,7 +199,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
                     if (ret == 0)
                     {
-                        Application.SBO_Application.SetStatusWarningMessage("DropIfExistFormattedSearch  BF: " + name);
+                        //Application.SBO_Application.SetStatusWarningMessage("DropIfExistFormattedSearch  BF: " + name);
                     }
                     else
                     {
@@ -193,7 +264,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
-                Application.SBO_Application.SetStatusWarningMessage("Se creó la categoría de BF: " + strCode);
+                //Application.SBO_Application.SetStatusWarningMessage("Se creó la categoría de BF: " + strCode);
                 return Convert.ToInt32(strCode);
             }
             catch (Exception ex)
@@ -227,7 +298,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
-                    Application.SBO_Application.SetStatusWarningMessage("Se creó la BF: " + name);
+                    //Application.SBO_Application.SetStatusWarningMessage("Se creó la BF: " + name);
                     if (userQuery != null)
                     {
                         System.Runtime.InteropServices.Marshal.ReleaseComObject(userQuery);
@@ -271,14 +342,14 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
 
         }
 
-        public static void AssignCreateFormattedSearch(Company company, string FormID, string ItemID, string ColumnID, int userQueryId)
+        public static void AssignCreateFormattedSearch(Company company, FormattedSearchDto formaSearch, int userQueryId)
         {
             try
             {
                 // Crear la búsqueda formateada
-                Application.SBO_Application.SetStatusWarningMessage("AssignCreateFormattedSearch");
+                //Application.SBO_Application.SetStatusWarningMessage("AssignCreateFormattedSearch");
                 FormattedSearches formattedSearch = (FormattedSearches)company.GetBusinessObject(BoObjectTypes.oFormattedSearches);
-                var idAPPFS = indexFMS(company, FormID, ItemID, ColumnID);
+                var idAPPFS = indexFMS(company, formaSearch.FormID, formaSearch.ItemID, formaSearch.ColumnID);
                 if (idAPPFS != -1)
                 {
                     formattedSearch.GetByKey(idAPPFS);
@@ -286,15 +357,37 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 else
                 {
 
-                    formattedSearch.FormID = FormID;// "UDO_FT_EXX_ANXN_CONF";// Entities.EXX_ANXN_COND.ID; // Form ID del UDO
-                    formattedSearch.ItemID = ItemID;// "0_U_G"; // ID del campo en el formulario
-                    formattedSearch.ColumnID = ColumnID;// "C_0_8"; // Nombre del campo en la tabla
+                    formattedSearch.FormID = formaSearch.FormID;// "UDO_FT_EXX_ANXN_CONF";// Entities.EXX_ANXN_COND.ID; // Form ID del UDO
+                    formattedSearch.ItemID = formaSearch.ItemID;// "0_U_G"; // ID del campo en el formulario
+                    formattedSearch.ColumnID = formaSearch.ColumnID;// "C_0_8"; // Nombre del campo en la tabla
 
                 }
 
                 formattedSearch.Action = BoFormattedSearchActionEnum.bofsaQuery;
                 formattedSearch.QueryID = userQueryId;
-                formattedSearch.ByField = BoYesNoEnum.tYES; // Nombre del campo en la tabla
+                formattedSearch.ByField = BoYesNoEnum.tNO; // Nombre del campo en la tabla
+
+                formattedSearch.Refresh = formaSearch.Refresh == "Y" ? BoYesNoEnum.tYES : BoYesNoEnum.tNO;
+                formattedSearch.ForceRefresh = formaSearch.ForceRefresh == "Y" ? BoYesNoEnum.tYES : BoYesNoEnum.tNO;
+
+                int cont = 1;
+
+                if (formaSearch.FieldIDs.Count == 1)
+                {
+
+                    formattedSearch.FieldID = formaSearch.FieldIDs.FirstOrDefault();
+                }
+                if (formaSearch.FieldIDs.Count > 1)
+                {
+                    foreach (var item in formaSearch.FieldIDs)
+                    {
+
+                        formattedSearch.FieldIDs.FieldID = item;
+                        formattedSearch.FieldIDs.Add();
+
+                    }
+
+                }
 
                 if (idAPPFS == -1)
                 {
@@ -310,7 +403,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                         Console.WriteLine("Formatted search added successfully.");
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
-                        Application.SBO_Application.SetStatusWarningMessage("Se asignó la BF: " + ItemID);
+                        //Application.SBO_Application.SetStatusWarningMessage("Se asignó la BF: " + formaSearch.ColumnID);
                     }
                 }
                 else
@@ -326,7 +419,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                     {
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
-                        Application.SBO_Application.SetStatusWarningMessage("Se asignó la BF: " + ItemID);
+                        //Application.SBO_Application.SetStatusWarningMessage("Se asignó la BF: " + formaSearch.ItemID);
                     }
                 }
 
@@ -437,9 +530,18 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                             FormID = node["FormID"].InnerText,
                             ItemID = node["ItemID"].InnerText,
                             ColumnID = node["ColumnID"].InnerText,
-                            userQueryId = 0
+                            Refresh = node["Refresh"].InnerText,
+                            ForceRefresh = node["ForceRefresh"].InnerText,
+                            userQueryId = 0,
+                            FieldIDs = new List<string>()
                         };
+                        XmlNodeList fieldIdNodes = node.SelectNodes("FieldIDs/FieldID");
+                        foreach (XmlNode fieldIdNode in fieldIdNodes)
+                        {
+                            fs.FieldIDs.Add(fieldIdNode.InnerText);
+                        }
 
+                        //Application.SBO_Application.SetStatusWarningMessage("Cargando..." ) ;
                         fsList.Add(fs);
                     }
 

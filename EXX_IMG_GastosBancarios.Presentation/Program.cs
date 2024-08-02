@@ -32,9 +32,15 @@ namespace EXX_IMG_GastosBancarios.Presentation
 
                 DIExtensions.Company = (SAPbobsCOM.Company)Application.SBO_Application.Company.GetDICompany();
                 MDResources.Messages = mostrarMensajes;
+
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+
+                var validVersion = SearchFormatedHelper.ValidVersion(DIExtensions.Company, version, "CONBANC");
+                //Application.SBO_Application.SetStatusWarningMessage("ValidVersion");
                 if (MDResources.loadMetaData(Assembly.GetExecutingAssembly().GetName().Version, Application.SBO_Application, "EXX", "CONBANC"))
                 {
-                    SearchFormatedHelper.Initialize(DIExtensions.Company, Assembly.GetExecutingAssembly().GetName().Version,"EXX", "CONBANC");
+
+                    SearchFormatedHelper.Initialize(DIExtensions.Company, version, "CONBANC", validVersion);
                     Menu MyMenu = new Menu();
                     MyMenu.AddMenuItems();
                     oApp.RegisterMenuEventHandler(MyMenu.SBO_Application_MenuEvent);

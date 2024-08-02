@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <BOM>
   <FS>
-    <sqlQuery>select "Account" , * from DSC1 where "BankCode" = $["@EXD_OMCB"."U_COD_BANCO"] and "Branch" = $["@EXD_MCB1"."U_COD_EMPRESA"]</sqlQuery>
+    <sqlQuery>select "Account" , "BankCode","GLAccount","UsrNumber4","UsrNumber3" from DSC1 where "BankCode" = $["@EXD_OMCB"."U_COD_BANCO"] and "Branch" = $["@EXD_MCB1"."U_COD_EMPRESA"]</sqlQuery>
     <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CuentaBancoGet</Name>
     <FormID>FormMaestroCodigosBancarios</FormID>
     <ItemID>Item_9</ItemID>
     <ColumnID>Col_17</ColumnID>
     <userQueryId></userQueryId>
+    <Refresh>N</Refresh>
+    <ForceRefresh>N</ForceRefresh>
   </FS>
   <FS>
     <sqlQuery>select "GLAccount" from DSC1 where "BankCode" = $["@EXD_OMCB"."U_COD_BANCO"] and "Branch" = $["@EXD_MCB1"."U_COD_EMPRESA"] and "Account" = $["@EXD_MCB1"."U_DES_CUENTA"]</sqlQuery>
@@ -15,5 +17,245 @@
     <ItemID>Item_9</ItemID>
     <ColumnID>Col_15</ColumnID>
     <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>Y</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_17</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE EMPRESA CHAR(2);
+
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+
+      IF IFNULL(EMPRESA,'') &lt;&gt; '' THEN
+
+      SELECT DISTINCT "PrjCode", "PrjName" FROM OPRJ T0 INNER JOIN "@EXC_PRESGENE" T1
+      ON T0."U_EXC_IDEMPRES" = T1."U_EXC_IDEMPRE" AND T0."PrjCode" = T1."U_EXC_CODIPROY"
+
+      WHERE "Active" = 'Y' AND T1."U_EXC_ESTADO" = 'A' AND "U_EXC_IDEMPRES" = EMPRESA;
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_Proyecto_Get</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_12</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>N</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE EMPRESA CHAR(2);
+      DECLARE PROYECTO NVARCHAR(15);
+
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PROYECTO] INTO PROYECTO FROM DUMMY;
+
+      IF IFNULL(EMPRESA,'') &lt;&gt; '' AND IFNULL(PROYECTO,'') &lt;&gt; '' THEN
+
+      SELECT "U_EXC_ETAPA" FROM "@EXC_PRESGENE" T1
+      WHERE "U_EXC_ESTADO" = 'A' AND "U_EXC_IDEMPRE" = EMPRESA AND "U_EXC_CODIPROY" = PROYECTO;
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_Etapa_Get</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_5</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_12</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      SELECT T0."PrcCode", T0."PrcName" FROM OPRC T0 WHERE T0."DimCode" = 2 AND  T0."Active" = 'Y'
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_SubEtapa_Get</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_6</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>N</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE PROYECTO NVARCHAR(50);
+      DECLARE EMPRESA CHAR(2);
+      DECLARE ETAPA NVARCHAR(8);
+
+      SELECT $["@EXD_MCB1".U_COD_PROYECTO] INTO PROYECTO FROM DUMMY;
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_DIM1] INTO ETAPA FROM DUMMY;
+
+      IF IFNULL(EMPRESA,'') &lt;&gt; '' AND IFNULL(PROYECTO,'') &lt;&gt; '' AND IFNULL(ETAPA,'') &lt;&gt; ''  THEN
+
+      SELECT
+
+      T1."U_EXC_CODPARPR",
+      T1."U_EXC_DESPARPR",
+      SUM(T1."U_EXC_TOTDIS") AS "Disponible"
+
+      FROM
+      "@EXC_PRESGENE" T0
+      INNER JOIN "@EXC_PRESGEN1" T1 ON T0."Code" = T1."Code"
+      WHERE
+      IFNULL(T0."U_EXC_ESTADO",'') = 'A'
+      AND IFNULL("U_EXC_IDEMPRE",0) = EMPRESA
+      AND IFNULL("U_EXC_CODIPROY",'') = PROYECTO
+      AND IFNULL(T0."U_EXC_ETAPA",'') = ETAPA
+      GROUP BY T1."U_EXC_CODPARPR", T1."U_EXC_DESPARPR";
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_PartPresupuestal_Get</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_10</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_14</FieldID>
+      <FieldID>Col_12</FieldID>
+      <FieldID>Col_5</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE PRESUPUESTO NVARCHAR(20);
+
+      SELECT $["@EXD_MCB1".U_COD_PARPRE] INTO PRESUPUESTO FROM DUMMY;
+
+      IF  IFNULL(PRESUPUESTO,'') &lt;&gt; '' THEN
+
+      SELECT MAX(T1."U_EXC_DESPARPR") FROM "@EXC_PRESGENE" T0 INNER JOIN "@EXC_PRESGEN1" T1 ON T0."Code" = T1."Code" WHERE T1."U_EXC_CODPARPR" = IFNULL(PRESUPUESTO,'');
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_NombrePartPresupuestal_Set</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_11</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>Y</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_10</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE EMPRESA CHAR(2);
+      DECLARE PROYECTO NVARCHAR(15);
+      DECLARE ETAPA NVARCHAR(8);
+      DECLARE PARTIDA NVARCHAR(20);
+
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PROYECTO] INTO PROYECTO FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_DIM1] INTO ETAPA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PARPRE] INTO PARTIDA FROM DUMMY;
+
+      IF IFNULL(PARTIDA,'') &lt;&gt; '' THEN
+
+      SELECT T1."U_EXC_CODCCONT" FROM "@EXC_PRESGENE" T0
+      INNER JOIN "@EXC_PRESGEN1" T1 ON T0."Code" = T1."Code"
+      WHERE
+      T0."U_EXC_IDEMPRE" = EMPRESA AND
+      T0."U_EXC_CODIPROY" = PROYECTO AND
+      T0."U_EXC_ETAPA" = ETAPA AND
+      T0."U_EXC_ESTADO" = 'A' AND
+      T1."U_EXC_CODPARPR" = PARTIDA;
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CodCuenta_Set</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_2</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_10</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE EMPRESA CHAR(2);
+      DECLARE PROYECTO NVARCHAR(15);
+      DECLARE ETAPA NVARCHAR(8);
+      DECLARE PARTIDA NVARCHAR(20);
+
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PROYECTO] INTO PROYECTO FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_DIM1] INTO ETAPA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PARPRE] INTO PARTIDA FROM DUMMY;
+
+      IF IFNULL(PARTIDA,'') &lt;&gt; '' THEN
+
+      SELECT T1."U_EXC_CENCOSTO" FROM "@EXC_PRESGENE" T0
+      INNER JOIN "@EXC_PRESGEN1" T1 ON T0."Code" = T1."Code"
+      WHERE
+      T0."U_EXC_IDEMPRE" = EMPRESA AND
+      T0."U_EXC_CODIPROY" = PROYECTO AND
+      T0."U_EXC_ETAPA" = ETAPA AND
+      T0."U_EXC_ESTADO" = 'A' AND
+      T1."U_EXC_CODPARPR" = PARTIDA;
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CenCos_Set</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_7</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_10</FieldID>
+    </FieldIDs>
+  </FS>
+  <FS>
+    <sqlQuery>
+      DECLARE EMPRESA CHAR(2);
+      DECLARE PROYECTO NVARCHAR(15);
+      DECLARE ETAPA NVARCHAR(8);
+      DECLARE PARTIDA NVARCHAR(20);
+
+      SELECT $["@EXD_MCB1"."U_COD_EMPRESA"] INTO EMPRESA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PROYECTO] INTO PROYECTO FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_DIM1] INTO ETAPA FROM DUMMY;
+      SELECT $["@EXD_MCB1".U_COD_PARPRE] INTO PARTIDA FROM DUMMY;
+
+      IF IFNULL(PARTIDA,'') &lt;&gt; '' THEN
+
+      SELECT T1."U_EXC_GERENCIA" FROM "@EXC_PRESGENE" T0
+      INNER JOIN "@EXC_PRESGEN1" T1 ON T0."Code" = T1."Code"
+      WHERE
+      T0."U_EXC_IDEMPRE" = EMPRESA AND
+      T0."U_EXC_CODIPROY" = PROYECTO AND
+      T0."U_EXC_ETAPA" = ETAPA AND
+      T0."U_EXC_ESTADO" = 'A' AND
+      T1."U_EXC_CODPARPR" = PARTIDA;
+
+      END IF;
+    </sqlQuery>
+    <Name>EXC_AddOnGastosBancarios_MaestroCodigosBancarios_Detalle_CenGes_Set</Name>
+    <FormID>FormMaestroCodigosBancarios</FormID>
+    <ItemID>Item_9</ItemID>
+    <ColumnID>Col_8</ColumnID>
+    <userQueryId></userQueryId>
+    <Refresh>Y</Refresh>
+    <ForceRefresh>N</ForceRefresh>
+    <FieldIDs>
+      <FieldID>Col_10</FieldID>
+    </FieldIDs>
   </FS>
 </BOM>
