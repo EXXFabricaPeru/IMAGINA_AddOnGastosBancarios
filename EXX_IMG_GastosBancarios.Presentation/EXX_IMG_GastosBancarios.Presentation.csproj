@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Domain\ConciliacionBancariaDomain.cs" />
     <Compile Include="Forms\FormConciliacionBancaria.b1f.cs">
       <DependentUpon>FormConciliacionBancaria.b1f</DependentUpon>
     </Compile>

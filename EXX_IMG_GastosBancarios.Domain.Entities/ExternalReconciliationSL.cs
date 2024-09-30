@@ -11,6 +11,7 @@ namespace EXX_IMG_GastosBancarios.Domain.Entities
         public class ExternalReconciliationModel
         {
             public string ReconciliationAccountType { get; set; }
+            //public DateTime ReconciliationDate { get; set; }
             public List<ReconciliationBankStatementLine> ReconciliationBankStatementLines { get; set; }
             public List<ReconciliationJournalEntryLine> ReconciliationJournalEntryLines { get; set; }
         }

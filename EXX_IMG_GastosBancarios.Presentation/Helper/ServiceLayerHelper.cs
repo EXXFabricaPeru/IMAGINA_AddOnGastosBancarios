@@ -50,10 +50,11 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
         }
         public static IRestResponse PostSL(string url, string body)
         {
-             band:
+        band:
             try
             {
-                if (serviceLayerAddress == null) Connect();
+                if (serviceLayerAddress == null)
+                    Connect();
 
 
                 ServicePointManager.Expect100Continue = true;
@@ -72,7 +73,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 request.AddCookie("B1SESSION", SLLoginResponse.B1SESSION);
                 IRestResponse response = client.Execute(request);
 
-               
+
                 return response;
             }
             catch (Exception ex)
@@ -89,13 +90,14 @@ namespace EXX_IMG_GastosBancarios.Presentation.Helper
                 dynamic errorMsj = JObject.Parse(ex.Message.Replace("'", ""));
                 throw new Exception(errorMsj.error.message.value);
             }
-            
+
         }
 
 
         public static IRestResponse GetSL(string url)
         {
-            if (serviceLayerAddress == null) Connect();
+            if (serviceLayerAddress == null)
+                Connect();
 
             ServicePointManager.Expect100Continue = true;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;

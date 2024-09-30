@@ -1,4 +1,5 @@
 ﻿using EXX_IMG_GastosBancarios.Domain.Entities;
+using EXX_IMG_GastosBancarios.Presentation.Domain;
 using EXX_IMG_GastosBancarios.Presentation.Helper;
 using JF_SBOAddon.Utiles.Extensions;
 using JF_SBOAddon.Utiles.Utilities;
@@ -6,8 +7,10 @@ using Newtonsoft.Json;
 using SAPbouiCOM.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 
 namespace EXX_IMG_GastosBancarios.Presentation.Forms
@@ -302,7 +305,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             {
                 //ServiceLayerHelper.Connect();
 
-                
+
                 lstOperaciones = new List<OperacionDto>();
                 var nroLinea = 0;
                 var codEmp = dbsEXD_OCBN.GetValueExt("U_COD_EMPRESA");
@@ -1423,10 +1426,11 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             {
                 try
                 {
+
                     var oCompanyService = this.GetCompany().GetCompanyService();
                     var ExtReconSvc = (SAPbobsCOM.ExternalReconciliationsService)oCompanyService.GetBusinessService(SAPbobsCOM.ServiceTypes.ExternalReconciliationsService);
                     var ExtReconciliation = (SAPbobsCOM.ExternalReconciliation)ExtReconSvc.GetDataInterface(SAPbobsCOM.ExternalReconciliationsServiceDataInterfaces.ersExternalReconciliation);
-                    Application.SBO_Application.SetStatusWarningMessage("Procesando " +item.LineIDPago);
+                    Application.SBO_Application.SetStatusWarningMessage("Procesando " + item.LineIDPago);
 
                     ExtReconciliation.ReconciliationAccountType = SAPbobsCOM.ReconciliationAccountTypeEnum.rat_GLAccount;
 
@@ -1542,81 +1546,160 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             //if (recSet != null)
             //    recSet = null;
 
-            ExternalReconciliationSL reconciliationSL =  new ExternalReconciliationSL();
+
+
+            ExternalReconciliationSL reconciliationSL = new ExternalReconciliationSL();
             reconciliationSL.ExternalReconciliation = new ExternalReconciliationSL.ExternalReconciliationModel();
             reconciliationSL.ExternalReconciliation.ReconciliationAccountType = "rat_GLAccount";
-            reconciliationSL.ExternalReconciliation.ReconciliationJournalEntryLines = new List<ExternalReconciliationSL.ReconciliationJournalEntryLine>();
-            reconciliationSL.ExternalReconciliation.ReconciliationBankStatementLines = new List<ExternalReconciliationSL.ReconciliationBankStatementLine>();
 
-            foreach (var item in reconDtos)
+            var cuentasGroup = reconDtos.GroupBy(t => t.Cuenta);
+            var url = Globals.ServiceLayerUrl + Globals.ExternalReconciliationService;
+
+            foreach (var grupo in cuentasGroup)
             {
-                try
+                reconciliationSL.ExternalReconciliation.ReconciliationJournalEntryLines = new List<ExternalReconciliationSL.ReconciliationJournalEntryLine>();
+                reconciliationSL.ExternalReconciliation.ReconciliationBankStatementLines = new List<ExternalReconciliationSL.ReconciliationBankStatementLine>();
+
+                foreach (var item in grupo)
                 {
-
-                    var url = Globals.ServiceLayerUrl + Globals.ExternalReconciliationService;
-
-                    var journalLine = new ExternalReconciliationSL.ReconciliationJournalEntryLine();
-                    journalLine.TransactionNumber = item.TransID;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
-                    journalLine.LineNumber = item.LineIDPago;//
-
-                    reconciliationSL.ExternalReconciliation.ReconciliationJournalEntryLines.Add(journalLine);
-
-                    var entryLine = new ExternalReconciliationSL.ReconciliationBankStatementLine();
-                    entryLine.BankStatementAccountCode = item.Cuenta;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
-                    entryLine.Sequence = item.Secuencia;// Convert.ToInt32(recSet.Fields.Item(1).Value.ToString());
-
-                    reconciliationSL.ExternalReconciliation.ReconciliationBankStatementLines.Add(entryLine);
-                    
-                    var jsonBody = JsonConvert.SerializeObject(reconciliationSL, new JsonSerializerSettings
+                    try
                     {
-                        DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
-                    });
-                    ServiceLayerHelper.PostSL(url, jsonBody);
+                        var journalLine = new ExternalReconciliationSL.ReconciliationJournalEntryLine();
+                        journalLine.TransactionNumber = item.TransID;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
+                        journalLine.LineNumber = item.LineIDPago;//
+
+                        reconciliationSL.ExternalReconciliation.ReconciliationJournalEntryLines.Add(journalLine);
+
+                        var entryLine = new ExternalReconciliationSL.ReconciliationBankStatementLine();
+                        entryLine.BankStatementAccountCode = item.Cuenta;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
+                        entryLine.Sequence = item.Secuencia;// Convert.ToInt32(recSet.Fields.Item(1).Value.ToString());
+
+                        reconciliationSL.ExternalReconciliation.ReconciliationBankStatementLines.Add(entryLine);
 
 
-                    for (int i = 1; i <= mtxOperaciones.RowCount; i++)
-                    {
-                        var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
-                        var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
-                        var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
-                        var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
 
-                        if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
-                        //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+                        for (int i = 1; i <= mtxOperaciones.RowCount; i++)
                         {
-                            ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = "Reconciliado";
-                            dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, "Reconciliado");
-                            mtxOperaciones.FlushToDataSource();
-                            ActualizarRecon(docEntry, item.LineID, "Reconciliado");
+                            var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
+                            var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
+                            var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
+                            var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
 
+                            if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
+                            //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+                            {
+                                //((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = "Reconciliado";
+                                //dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, "Reconciliado");
+                                //mtxOperaciones.FlushToDataSource();
+                                ActualizarRecon(docEntry, item.LineID, "Reconciliado");
+
+                            }
                         }
-                    }
-                    contCOrrectoReprocesar++;
+                        contCOrrectoReprocesar++;
 
+                    }
+                    catch (Exception ex)
+                    {
+                        /*
+                        //for (int i = 1; i <= mtxOperaciones.RowCount; i++)
+                        //{
+
+                        //    var error = ex.Message.Length > 200 ? ex.Message.Substring(0, 199) : ex.Message;
+                        //    var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
+                        //    var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
+                        //    var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
+                        //    var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
+
+                        //    if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
+                        //    //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+                        //    {
+                        //        ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = error;
+                        //        dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, error);
+                        //        mtxOperaciones.FlushToDataSource();
+                        //        ActualizarRecon(docEntry, item.LineID, error);
+
+                        //    }
+                        //}
+                        */
+                    }
                 }
-                catch (Exception ex)
+
+                var jsonBody = JsonConvert.SerializeObject(reconciliationSL, new JsonSerializerSettings
                 {
-                    for (int i = 1; i <= mtxOperaciones.RowCount; i++)
-                    {
-
-                        var error = ex.Message.Length > 200 ? ex.Message.Substring(0, 199) : ex.Message;
-                        var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
-                        var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
-                        var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
-                        var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
-
-                        if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
-                        //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
-                        {
-                            ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = error;
-                            dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, error);
-                            mtxOperaciones.FlushToDataSource();
-                            ActualizarRecon(docEntry, item.LineID, error);
-
-                        }
-                    }
-                }
+                    DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+                });
+                var response = ServiceLayerHelper.PostSL(url, jsonBody);
             }
+
+            //foreach (var item in reconDtos)
+            //{
+            //    try
+            //    {
+
+            //        var url = Globals.ServiceLayerUrl + Globals.ExternalReconciliationService;
+
+            //        var journalLine = new ExternalReconciliationSL.ReconciliationJournalEntryLine();
+            //        journalLine.TransactionNumber = item.TransID;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
+            //        journalLine.LineNumber = item.LineIDPago;//
+
+            //        reconciliationSL.ExternalReconciliation.ReconciliationJournalEntryLines.Add(journalLine);
+
+            //        var entryLine = new ExternalReconciliationSL.ReconciliationBankStatementLine();
+            //        entryLine.BankStatementAccountCode = item.Cuenta;//Convert.ToInt32(recSet.Fields.Item(0).Value.ToString());
+            //        entryLine.Sequence = item.Secuencia;// Convert.ToInt32(recSet.Fields.Item(1).Value.ToString());
+
+            //        reconciliationSL.ExternalReconciliation.ReconciliationBankStatementLines.Add(entryLine);
+
+            //        var jsonBody = JsonConvert.SerializeObject(reconciliationSL, new JsonSerializerSettings
+            //        {
+            //            DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+            //        });
+            //        ServiceLayerHelper.PostSL(url, jsonBody);
+
+
+            //        for (int i = 1; i <= mtxOperaciones.RowCount; i++)
+            //        {
+            //            var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
+            //            var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
+            //            var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
+            //            var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
+
+            //            if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
+            //            //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+            //            {
+            //                ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = "Reconciliado";
+            //                dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, "Reconciliado");
+            //                mtxOperaciones.FlushToDataSource();
+            //                ActualizarRecon(docEntry, item.LineID, "Reconciliado");
+
+            //            }
+            //        }
+            //        contCOrrectoReprocesar++;
+
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        for (int i = 1; i <= mtxOperaciones.RowCount; i++)
+            //        {
+
+            //            var error = ex.Message.Length > 200 ? ex.Message.Substring(0, 199) : ex.Message;
+            //            var numSecuencia = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_9").Cells.Item(i).Specific;
+            //            var codbanco = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_21").Cells.Item(i).Specific;
+            //            var codSucursal = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_23").Cells.Item(i).Specific;
+            //            var codCuenta = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_25").Cells.Item(i).Specific;
+
+            //            if (numSecuencia.Value == item.Secuencia.ToString() && codbanco.Value == item.Banco && item.Sucursal == codSucursal.Value && item.Cuenta == codCuenta.Value)
+            //            //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+            //            {
+            //                ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific)).Value = error;
+            //                dbsEXD_CBN1.SetValue("U_COD_ESTADO", i - 1, error);
+            //                mtxOperaciones.FlushToDataSource();
+            //                ActualizarRecon(docEntry, item.LineID, error);
+
+            //            }
+            //        }
+            //    }
+            //}
 
             Application.SBO_Application.SetStatusWarningMessage("Reconciliación procesada");
         }
@@ -1682,12 +1765,24 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                 //Application.SBO_Application.SetStatusWarningMessage("Form_DataAddAfter: Procesando reconciliación");
                 //Application.SBO_Application.SetStatusWarningMessage(dbsEXD_OCBN.GetValueExt("DocEntry"));
 
-                GeneracióndePagos(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
+
+                Stopwatch timeMeasure = new Stopwatch();
+                timeMeasure.Start();
+
+                ServiceLayerHelper.Connect();
+                //GeneracióndePagos(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
+                ConciliacionBancariaDomain.GeneraciondePagosSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")), this.GetCompany());
+
                 //GenerarReconciliacion(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
-                GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
+                //GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
+                ConciliacionBancariaDomain.GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")), this.GetCompany());
+
+                timeMeasure.Stop();
+                Application.SBO_Application.SetStatusWarningMessage("Tiempo milisegundos: " + timeMeasure.Elapsed.TotalMilliseconds);
+                Application.SBO_Application.SetStatusWarningMessage("Tiempo segundos: " + timeMeasure.Elapsed.TotalSeconds);
 
 
-                Application.SBO_Application.SetStatusSuccessMessage(" Reconciliación realizada con éxito");
+                //Application.SBO_Application.SetStatusSuccessMessage(" Reconciliación realizada con éxito");
                 ManejarControlesPorEstado("A");
                 UIAPIRawForm.Refresh();
 
@@ -1722,115 +1817,173 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
         int contCOrrectoReprocesar = 0;
         private void Button0_PressedAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
+            ReprocesarSL();
+/*
+            //try
+            //{
+            //    contCOrrectoReprocesar = 0;
+
+            //    var cntOK = 0;
+            //    if (UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_ADD_MODE)
+            //    {
+            //        ShowDialogMessageBox("Se procederá a procesar las líneas pendientes de reconciliacion. ¿Desea continuar? ",
+            //      () =>
+            //      {
+            //          //var pendientes = lstOperaciones.Where(t => t.Estado != "Reconciliado").Count();
+            //          var pendientesPagados = lstOperaciones.Where(t => t.Estado == "Procesados").Count();
+            //          var total = lstOperaciones.Count();
+            //          var Reconciliados = lstOperaciones.Where(t => t.Estado == "Reconciliado").Count();
+            //          var porProcesar = total - Reconciliados;
+            //          //var error = total - Reconciliados- pendientesPagados;
+            //          int pendientes = 0;
+            //          for (int i = 1; i <= mtxOperaciones.RowCount; i++)
+            //          {
+            //              var estado = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific;
+            //              if (estado.Value != "Reconciliado")
+            //              {
+            //                  pendientes++;
+            //              }
+            //          }
+
+            //          if (pendientes > 0)
+            //          {
+            //              Application.SBO_Application.SetStatusWarningMessage("Inicio Reproceso de pagos");
+            //              foreach (var ope in lstOperaciones.Where(t => string.IsNullOrEmpty(t.CodPagoSAP)))
+            //              {
+            //                  try
+            //                  {
+
+            //                      if (string.IsNullOrEmpty(ope.CodPagoSAP))
+            //                      {
+            //                          Application.SBO_Application.SetStatusWarningMessage("Generando Pago: " + ope.CodPagoSAP);
+            //                          var fechaCont = edtFechaContabilizacion.Value;
+            //                          var rslt = GenerarPago(ope, fechaCont);
+            //                          //Application.SBO_Application.SetStatusWarningMessage(rslt.Item1 + "-"+ rslt.Item2);
+            //                          for (int i = 0; i < dbsEXD_CBN1.Size; i++)
+            //                          {
+            //                              if (ope.Idcuenta == dbsEXD_CBN1.GetValue("U_COD_CUENTA", i) && ope.NroSecuencia.ToString() == dbsEXD_CBN1.GetValue("U_NUM_SECUENCIA", i) && ope.IdBanco == dbsEXD_CBN1.GetValue("U_COD_BANCO", i))
+            //                              {
+            //                                  dbsEXD_CBN1.SetValue("U_COD_PAGO_SAP", i, rslt.Item1.ToString());
+            //                                  dbsEXD_CBN1.SetValue("U_TIPO_PAGO", i, rslt.Item2.ToString());
+            //                                  dbsEXD_CBN1.SetValue("U_COD_ESTADO", i, "Procesado");
+            //                                  ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_8").Cells.Item(i + 1).Specific).Value = rslt.Item1.ToString();
+            //                                  ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_10").Cells.Item(i + 1).Specific).Value = rslt.Item2.ToString();
+            //                                  ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_28").Cells.Item(i + 1).Specific).Value = "Procesado";
+            //                                  //contCOrrectoReprocesar++;
+            //                              }
+            //                          }
+            //                          ope.CodPagoSAP = rslt.Item1.ToString();
+            //                      }
+
+            //                      cntOK++;
+            //                  }
+            //                  catch (Exception ex)
+            //                  {
+            //                      //cntErr++;
+            //                      for (int i = 0; i < dbsEXD_CBN1.Size; i++)
+            //                      {
+            //                          if (ope.NroSecuencia.ToString() == dbsEXD_CBN1.GetValue("U_NUM_SECUENCIA", i) && ope.IdBanco == dbsEXD_CBN1.GetValue("U_COD_BANCO", i))
+            //                          //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
+            //                          {
+            //                              ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i + 1).Specific)).Value = ex.Message;
+            //                              dbsEXD_CBN1.SetValue("U_COD_ESTADO", i, ex.Message);
+            //                          }
+            //                      }
+
+            //                      mtxOperaciones.AutoResizeColumns();
+            //                      //throw new InvalidOperationException("Error de Pago");
+            //                      Application.SBO_Application.SetStatusErrorMessage("GenerarPago:" + ex.Message);
+            //                  }
+
+            //                  if (cntOK > 0)
+            //                  {
+            //                      if (this.UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_UPDATE_MODE)
+            //                          this.UIAPIRawForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE;
+            //                      this.UIAPIRawForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
+            //                  }
+            //              }
+
+            //              Application.SBO_Application.SetStatusWarningMessage("Inicio Reproceso de reconciliación");
+
+            //              GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
+
+            //              dbsEXD_OCBN.SetValueExt("U_ESTADO", "R");
+
+            //              if (this.UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_UPDATE_MODE)
+            //                  this.UIAPIRawForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE;
+            //              this.UIAPIRawForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
+
+            //              Application.SBO_Application.MessageBox("Procesados correctamente " + contCOrrectoReprocesar + "/" + porProcesar);
+            //              Application.SBO_Application.SetStatusSuccessMessage("Reconciliación realizada con éxito");
+            //          }
+            //          else
+            //          {
+            //              Application.SBO_Application.MessageBox("No se encontraron registros con errores por procesar");
+            //          }
+
+
+            //      },
+            //      null);
+
+
+
+
+            //    }
+            //    else
+            //    {
+            //        Application.SBO_Application.SetStatusErrorMessage("Solo se puede reprocesar una vez creada la conciliación bancaria");
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Application.SBO_Application.SetStatusErrorMessage(ex.Message);
+            //}
+            //finally
+            //{
+            //    UIAPIRawForm.Refresh();
+            //}*/
+
+        }
+
+        private void ReprocesarSL()
+        {
             try
             {
-                contCOrrectoReprocesar = 0;
-
-                var cntOK = 0;
                 if (UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_ADD_MODE)
                 {
                     ShowDialogMessageBox("Se procederá a procesar las líneas pendientes de reconciliacion. ¿Desea continuar? ",
-                  () =>
-                  {
-                      //var pendientes = lstOperaciones.Where(t => t.Estado != "Reconciliado").Count();
-                      var pendientesPagados = lstOperaciones.Where(t => t.Estado == "Procesados").Count();
-                      var total = lstOperaciones.Count();
-                      var Reconciliados = lstOperaciones.Where(t => t.Estado == "Reconciliado").Count();
-                      var porProcesar = total - Reconciliados;
-                      //var error = total - Reconciliados- pendientesPagados;
-                      int pendientes = 0;
-                      for (int i = 1; i <= mtxOperaciones.RowCount; i++)
-                      {
-                          var estado = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific;
-                          if (estado.Value != "Reconciliado")
-                          {
-                              pendientes++;
-                          }
-                      }
+                        () =>
+                        {
+                            //var pendientesPagados = lstOperaciones.Where(t => t.Estado == "Procesados").Count();
+                            //var total = lstOperaciones.Count();
+                            //var Reconciliados = lstOperaciones.Where(t => t.Estado == "Reconciliado").Count();
+                            //var porProcesar = total - Reconciliados;
+                            ////var error = total - Reconciliados- pendientesPagados;
+                            //int pendientes = 0;
+                            //for (int i = 1; i <= mtxOperaciones.RowCount; i++)
+                            //{
+                            //    var estado = (SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_28").Cells.Item(i).Specific;
+                            //    if (estado.Value != "Reconciliado")
+                            //    {
+                            //        pendientes++;
+                            //    }
+                            //}
 
-                      if (pendientes > 0)
-                      {
-                          Application.SBO_Application.SetStatusWarningMessage("Inicio Reproceso de pagos");
-                          foreach (var ope in lstOperaciones.Where(t => string.IsNullOrEmpty(t.CodPagoSAP)))
-                          {
-                              try
-                              {
+                            Stopwatch timeMeasure = new Stopwatch();
+                            timeMeasure.Start();
 
-                                  if (string.IsNullOrEmpty(ope.CodPagoSAP))
-                                  {
-                                      Application.SBO_Application.SetStatusWarningMessage("Generando Pago: " + ope.CodPagoSAP);
-                                      var fechaCont = edtFechaContabilizacion.Value;
-                                      var rslt = GenerarPago(ope, fechaCont);
-                                      //Application.SBO_Application.SetStatusWarningMessage(rslt.Item1 + "-"+ rslt.Item2);
-                                      for (int i = 0; i < dbsEXD_CBN1.Size; i++)
-                                      {
-                                          if (ope.Idcuenta == dbsEXD_CBN1.GetValue("U_COD_CUENTA", i) && ope.NroSecuencia.ToString() == dbsEXD_CBN1.GetValue("U_NUM_SECUENCIA", i) && ope.IdBanco == dbsEXD_CBN1.GetValue("U_COD_BANCO", i))
-                                          {
-                                              dbsEXD_CBN1.SetValue("U_COD_PAGO_SAP", i, rslt.Item1.ToString());
-                                              dbsEXD_CBN1.SetValue("U_TIPO_PAGO", i, rslt.Item2.ToString());
-                                              dbsEXD_CBN1.SetValue("U_COD_ESTADO", i, "Procesado");
-                                              ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_8").Cells.Item(i + 1).Specific).Value = rslt.Item1.ToString();
-                                              ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_10").Cells.Item(i + 1).Specific).Value = rslt.Item2.ToString();
-                                              ((SAPbouiCOM.EditText)mtxOperaciones.Columns.Item("Col_28").Cells.Item(i + 1).Specific).Value = "Procesado";
-                                              //contCOrrectoReprocesar++;
-                                          }
-                                      }
-                                      ope.CodPagoSAP = rslt.Item1.ToString();
-                                  }
+                            ServiceLayerHelper.Connect();
 
-                                  cntOK++;
-                              }
-                              catch (Exception ex)
-                              {
-                                  //cntErr++;
-                                  for (int i = 0; i < dbsEXD_CBN1.Size; i++)
-                                  {
-                                      if (ope.NroSecuencia.ToString() == dbsEXD_CBN1.GetValue("U_NUM_SECUENCIA", i) && ope.IdBanco == dbsEXD_CBN1.GetValue("U_COD_BANCO", i))
-                                      //if (ope.IdBanco.ToString() == dbsEXD_CBN1.GetValue("U_COD_BANCO", i) && ope.Importe == double.Parse(dbsEXD_CBN1.GetValue("U_IMPORTE", i).ToString()))
-                                      {
-                                          ((SAPbouiCOM.EditText)(mtxOperaciones.Columns.Item("Col_28").Cells.Item(i + 1).Specific)).Value = ex.Message;
-                                          dbsEXD_CBN1.SetValue("U_COD_ESTADO", i, ex.Message);
-                                      }
-                                  }
+                            ConciliacionBancariaDomain.GeneraciondePagosSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")), this.GetCompany());
+    
+                            ConciliacionBancariaDomain.GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")), this.GetCompany());
 
-                                  mtxOperaciones.AutoResizeColumns();
-                                  //throw new InvalidOperationException("Error de Pago");
-                                  Application.SBO_Application.SetStatusErrorMessage("GenerarPago:" + ex.Message);
-                              }
-
-                              if (cntOK > 0)
-                              {
-                                  if (this.UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_UPDATE_MODE)
-                                      this.UIAPIRawForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE;
-                                  this.UIAPIRawForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
-                              }
-                          }
-
-                          Application.SBO_Application.SetStatusWarningMessage("Inicio Reproceso de reconciliación");
-
-                          GenerarReconciliacionSL(Convert.ToInt32(dbsEXD_OCBN.GetValueExt("DocEntry")));
-
-                          dbsEXD_OCBN.SetValueExt("U_ESTADO", "R");
-
-                          if (this.UIAPIRawForm.Mode != SAPbouiCOM.BoFormMode.fm_UPDATE_MODE)
-                              this.UIAPIRawForm.Mode = SAPbouiCOM.BoFormMode.fm_UPDATE_MODE;
-                          this.UIAPIRawForm.Items.Item("1").Click(SAPbouiCOM.BoCellClickType.ct_Regular);
-
-                          Application.SBO_Application.MessageBox("Procesados correctamente " + contCOrrectoReprocesar + "/" + porProcesar);
-                          Application.SBO_Application.SetStatusSuccessMessage("Reconciliación realizada con éxito");
-                      }
-                      else
-                      {
-                          Application.SBO_Application.MessageBox("No se encontraron registros con errores por procesar");
-                      }
-
-
-                  },
-                  null);
-
-
-
-
+                            timeMeasure.Stop();
+                            Application.SBO_Application.SetStatusWarningMessage("Tiempo milisegundos: " + timeMeasure.Elapsed.TotalMilliseconds);
+                            Application.SBO_Application.SetStatusWarningMessage("Tiempo segundos: " + timeMeasure.Elapsed.TotalSeconds);
+                            UIAPIRawForm.Refresh();
+                        } ,
+                        null);
                 }
                 else
                 {
@@ -1845,7 +1998,6 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             {
                 UIAPIRawForm.Refresh();
             }
-
         }
 
         private void Form_ResizeAfter(SAPbouiCOM.SBOItemEventArg pVal)

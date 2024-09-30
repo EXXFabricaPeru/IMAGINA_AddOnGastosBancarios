@@ -60,10 +60,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BF\FormattedSearchDto.cs" />
+    <Compile Include="ErrorSLModel.cs" />
     <Compile Include="ExternalReconciliationSL.cs" />
     <Compile Include="OperacionDto.cs" />
+    <Compile Include="PaymentSL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReconDto.cs" />
+    <Compile Include="RespuestaPagoModel.cs" />
     <Compile Include="SLLogin.cs" />
   </ItemGroup>
   <ItemGroup />
