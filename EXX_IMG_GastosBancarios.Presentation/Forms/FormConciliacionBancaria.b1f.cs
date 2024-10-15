@@ -1319,7 +1319,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
 
             payment.AccountPayments.UserFields.Fields.Item("U_EXC_PARTPRES").Value = ope.CodParPre;
             payment.AccountPayments.UserFields.Fields.Item("U_EXC_NOMPPR").Value = ope.NomParPre;
-            payment.UserFields.Fields.Item("U_EXX_CODGB").Value = ope.Idcuenta + "-" + ope.NroSecuencia;
+            payment.UserFields.Fields.Item("U_EXX_CODGAB").Value = ope.Idcuenta + "-" + ope.NroSecuencia;
 
             var rslt = payment.Add();
 

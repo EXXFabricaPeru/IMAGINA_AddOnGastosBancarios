@@ -71,7 +71,15 @@ namespace EXX_IMG_GastosBancarios.Presentation.Domain
             payment.TransferSum = ope.Importe;
 
             payment.U_EXX_MPTRABAN = ope.CodMPTraBan;
-            payment.U_EXX_CODGB = ope.Idcuenta + "-" + ope.NroSecuencia;
+            //payment.U_EXX_CODGB = ope.Idcuenta + "-" + ope.NroSecuencia;
+            payment.U_EXX_CODGAB = 
+                                ope.Idcuenta + "-" + 
+                                ope.NroSecuencia+"-"+
+                                DateTime.ParseExact(fechaCont, "yyyyMMdd", CultureInfo.InvariantCulture).ToString("yyyyMMdd") + "-" +
+                                ope.NroReferencia + "-" +
+                                ope.InfoDetallada + "-" +
+                                ope.Importe
+                                ;
             payment.JournalRemarks = ope.Glosa;
 
             payment.PaymentAccounts = new List<PaymentSL.PaymentAccount>();
@@ -182,7 +190,9 @@ namespace EXX_IMG_GastosBancarios.Presentation.Domain
                         NroCuenta = recSet.Fields.Item("U_NUM_CUENTA").Value.ToString(),
                         NroReferencia = recSet.Fields.Item("U_NUM_OPERACION").Value.ToString(),
                         TipoImporte = recSet.Fields.Item("U_TIPO_IMPORTE").Value.ToString(),
-                        FechaCont = recSet.Fields.Item("U_FECHA_CONT").Value.ToString()
+                        FechaCont = recSet.Fields.Item("U_FECHA_CONT").Value.ToString(),
+                        InfoDetallada = recSet.Fields.Item("U_INFO_DETALLADA").Value.ToString(),
+                        FechaOperacion = recSet.Fields.Item("U_FECHA_OPERACION").Value.ToString(),
                     };
 
                     list.Add(ope);

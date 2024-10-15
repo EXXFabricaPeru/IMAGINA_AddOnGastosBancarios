@@ -211,7 +211,8 @@ namespace EXX_IMG_GastosBancarios.Domain.Entities
         public dynamic U_SMC_RETENCION_BAJA { get; set; }
         public dynamic U_EXX_CODPAGDET { get; set; }
         public string U_EXC_MIGR { get; set; }
-        public dynamic U_EXX_CODGB { get; set; }
+        //public dynamic U_EXX_CODGB { get; set; }
+        public dynamic U_EXX_CODGAB { get; set; }
         public List<dynamic> PaymentChecks { get; set; }
         //public List<PaymentInvoice> PaymentInvoices { get; set; }
         //public List<dynamic> PaymentCreditCards { get; set; }

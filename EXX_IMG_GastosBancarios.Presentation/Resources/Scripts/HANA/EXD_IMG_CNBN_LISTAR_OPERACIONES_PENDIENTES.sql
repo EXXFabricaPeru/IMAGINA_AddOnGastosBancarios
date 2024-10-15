@@ -63,46 +63,59 @@ BEGIN
 		from  --"@EXD_OMCB" TX0 inner join 
 		"@EXD_MCB1" TX1 --on TX0."Code" = TX1."Code"
 		where IFNULL(TX1."U_CREAR_CONTA",'')='Y' --AND
-	) T1 on 
-	
-	
-	
-	( T1."Match"=2 AND  IFNULL(T1."CodOpe",'') = T0."ExternCode" )
-	AND
+	) T1 on ( T1."Match"=2 AND  IFNULL(T1."CodOpe",'') = T0."ExternCode" )	AND T0."AcctCode" = T1."CodCtaBanco"
 	/*OR (T0."Memo" like '%'||T1."CodOpe2"||'%' oR T0."Memo2" like '%'||T1."CodOpe2"||'%'))
 	and*/
 	---(T1."CodOpe" = T0."ExternCode" OR (T0."Memo" like '%'||T1."CodOpe"||'%' oR T0."Memo2" like '%'||T1."CodOpe"||'%')) and
-	T0."AcctCode" = T1."CodCtaBanco"
 	INNER JOIN DSC1 D1 On D1."GLAccount"=T0."AcctCode" 
 	INNER JOIN OBPL BL ON Bl."BPLId"= D1."Branch" --select "BPLId","BPLName" from OBPL
  	INNER join OACT CT on D1."GLAccount" =CT."AcctCode"  
  	INNER join ODSC DC on DC."BankCode"= D1."BankCode"
- 	LEFT JOIN "@EXD_CBN1" CB1 on CB1."U_NUM_SECUENCIA"=T0."Sequence" AND D1."BankCode"=CB1."U_COD_BANCO"
+ 	LEFT JOIN "@EXD_CBN1" CB1 on 
+ 			CB1."U_NUM_SECUENCIA"=T0."Sequence" AND 
+ 			D1."BankCode"=CB1."U_COD_BANCO" AND 
+ 			T0."Ref"=CB1."U_NUM_OPERACION" AND
+ 			T0."Memo"=CB1."U_INFO_DETALLADA" AND
+ 			T0."DueDate"=CB1."U_FECHA_OPERACION" AND
+ 			CASE WHEN T0."DebAmount">0 THEN T0."DebAmount" ELSE T0."CredAmnt" END =CB1."U_IMPORTE"
  	
 	where 
 	coalesce("BankMatch",'0') = '0' and 
-	( :idBanco is null or  DC."BankCode" = :idBanco )
-	and ( :codCuenta is null or  T0."AcctCode" = :codCuenta)
-	AND ( :idSucursal is null or  D1."Branch" = :idSucursal)
-	
-	and T0."DueDate" between :fechaDesde and :fechaHasta
+	( :idBanco is null or  DC."BankCode" = :idBanco ) and 
+	( :codCuenta is null or  T0."AcctCode" = :codCuenta) AND 
+	( :idSucursal is null or  D1."Branch" = :idSucursal) and 
+	T0."DueDate" between :fechaDesde and :fechaHasta
 	and 
 	(
-	coalesce((select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
-	where TX0."U_COD_CUENTA" = T0."AcctCode"  and ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence"),'N') = 'N'
-	
-	or 
-	(
-	IFNULL("U_COD_ESTADO",'')='Reconciliado'
-	 AND IFNULL(T0."BankMatch",0)=0
-	 and (select count(*) from "OVPM" OV where OV."DocEntry" = CB1."U_COD_PAGO_SAP" 
-	and OV."Canceled"='Y' ) >0
-	 )
+		coalesce(
+		(	select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
+				where 
+					TX0."U_COD_CUENTA" = T0."AcctCode"  and 
+					ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence" AND
+					T0."Ref"=TX0."U_NUM_OPERACION" AND
+ 					T0."Memo"=TX0."U_INFO_DETALLADA" AND
+ 					T0."DueDate"=TX0."U_FECHA_OPERACION" AND
+ 					CASE WHEN T0."DebAmount">0 THEN T0."DebAmount" ELSE T0."CredAmnt" END =TX0."U_IMPORTE" AND
+					IFNULL(TX0."U_COD_ESTADO",'')='Reconciliado'
+			),'N') = 'N' --AND
+			--T0."Ref"=CB1."U_NUM_OPERACION"  
+		or 
+		(
+		IFNULL("U_COD_ESTADO",'')='Reconciliado' AND 
+		IFNULL(T0."BankMatch",0)=0 and 
+		(
+		(select count(*) from "OVPM" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=46 ) >0 
+				OR
+			(select count(*) from "ORCT" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=24 ) >0
+		)
+		--(select count(*) from "OVPM" OV 
+		--	where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=46 ) >0 
+	 	)
 	)
 			
-			
-			
-
+					
 --	order by 1;
 	
 	
@@ -185,13 +198,30 @@ AND ( :idSucursal is null or  D1."Branch" = :idSucursal)
 	and T0."DueDate" between :fechaDesde and :fechaHasta
 	and 
 	(
-	coalesce((select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
-	where TX0."U_COD_CUENTA" = T0."AcctCode" and ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence"),'N') = 'N'
+	coalesce(
+	(	select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
+				where 
+					TX0."U_COD_CUENTA" = T0."AcctCode"  and 
+					ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence" AND
+					T0."Ref"=TX0."U_NUM_OPERACION" AND
+ 					T0."Memo"=TX0."U_INFO_DETALLADA" AND
+ 					T0."DueDate"=TX0."U_FECHA_OPERACION" AND
+ 					CASE WHEN T0."DebAmount">0 THEN T0."DebAmount" ELSE T0."CredAmnt" END =TX0."U_IMPORTE" AND
+					IFNULL(TX0."U_COD_ESTADO",'')='Reconciliado'
+			),'N') = 'N' --AND
 	
 	OR 
 	(IFNULL("U_COD_ESTADO",'')='Reconciliado' AND IFNULL(T0."BankMatch",0)=0
-	 and (select count(*) from "OVPM" OV where OV."DocEntry" = CB1."U_COD_PAGO_SAP" 
-	and OV."Canceled"='Y' ) >0)
+	 and 
+	-- (select count(*) from "OVPM" OV where OV."DocEntry" = CB1."U_COD_PAGO_SAP" 
+	--and OV."Canceled"='Y' ) >0)
+	(select count(*) from "OVPM" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=46 ) >0 
+				OR
+			(select count(*) from "ORCT" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=24 ) >0
+		)
+	
 	)
 		and IFNULL(T1."CodOpe",'') =''
 	and IFNULL(T0."ExternCode",'') =''
@@ -275,13 +305,28 @@ AND ( :idSucursal is null or  D1."Branch" = :idSucursal)
 	and T0."DueDate" between :fechaDesde and :fechaHasta
 	and 
 	(
-	coalesce((select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
-	where TX0."U_COD_CUENTA" = T0."AcctCode" and ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence"),'N') = 'N'
+	coalesce((	select max('Y') from "@EXD_CBN1" TX0 inner join "@EXD_OCBN" TX1 on TX0."DocEntry" = TX1."DocEntry" 
+				where 
+					TX0."U_COD_CUENTA" = T0."AcctCode"  and 
+					ifnull(TX0."U_NUM_SECUENCIA",'-1') = T0."Sequence" AND
+					T0."Ref"=TX0."U_NUM_OPERACION" AND
+ 					T0."Memo"=TX0."U_INFO_DETALLADA" AND
+ 					T0."DueDate"=TX0."U_FECHA_OPERACION" AND
+ 					CASE WHEN T0."DebAmount">0 THEN T0."DebAmount" ELSE T0."CredAmnt" END =TX0."U_IMPORTE" AND
+					IFNULL(TX0."U_COD_ESTADO",'')='Reconciliado'
+			),'N') = 'N' --AND
 	
 	OR 
 	(IFNULL("U_COD_ESTADO",'')='Reconciliado' AND IFNULL(T0."BankMatch",0)=0
-	 and (select count(*) from "OVPM" OV where OV."DocEntry" = CB1."U_COD_PAGO_SAP" 
-	and OV."Canceled"='Y' ) >0)
+	 and 
+	 --(select count(*) from "OVPM" OV where OV."DocEntry" = CB1."U_COD_PAGO_SAP" 
+	--and OV."Canceled"='Y' ) >0)
+	(select count(*) from "OVPM" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=46 ) >0 
+				OR
+			(select count(*) from "ORCT" OV 
+				where OV."DocEntry" = IFNULL(CB1."U_COD_PAGO_SAP",0) and OV."Canceled"='Y' and CB1."U_TIPO_PAGO"=24 ) >0
+		)
 	)
 		and IFNULL(T1."CodOpe",'') =''
 	and IFNULL(T0."ExternCode",'') =''

@@ -7,13 +7,11 @@
     </AdmInfo>
     <UserFieldsMD>
       <row>
-        <Name>EXX_CODGB</Name>
-        <Type>db_Alpha</Type>
-        <Size>10</Size>
-        <Description>Código de banco</Description>
+        <Name>EXX_CODGAB</Name>
+        <Type>db_Memo</Type>
+        <Description>Código de gasto bancario</Description>
         <SubType>st_None</SubType>
         <TableName>OVPM</TableName>
-        <EditSize>150</EditSize>
         <Mandatory>tNO</Mandatory>
       </row>
     </UserFieldsMD>
