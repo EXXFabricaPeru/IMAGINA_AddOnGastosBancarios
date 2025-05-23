@@ -1,10 +1,13 @@
-﻿using JF_SBOAddon.Utiles.Extensions;
+﻿using EXX_IMG_GastosBancarios.Domain.Entities;
+using JF_SBOAddon.Utiles.Extensions;
 using JF_SBOAddon.Utiles.Utilities;
 using SAPbouiCOM.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace EXX_IMG_GastosBancarios.Presentation.Forms
 {
@@ -101,7 +104,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             {
 
             }
-         
+
 
             var cflCta = this.UIAPIRawForm.ChooseFromLists.Item("CFL_CTA");
             var cnds = cflCta.GetConditions();
@@ -138,7 +141,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             }
         }
 
-       
+
 
         private void cmbBancos_ComboSelectAfter(object sboObject, SAPbouiCOM.SBOItemEventArg pVal)
         {
@@ -158,10 +161,10 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                     cuenta.ValidValues.Remove(0, SAPbouiCOM.BoSearchKey.psk_Index);
                 }
             }
-            
+
         }
 
-       
+
 
         private void Form_RightClickBefore(ref SAPbouiCOM.ContextMenuInfo eventInfo, out bool BubbleEvent)
         {
@@ -235,47 +238,201 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
         {
             BubbleEvent = true;
 
+
+            if (this.UIAPIRawForm.Mode == SAPbouiCOM.BoFormMode.fm_FIND_MODE) return;
+
+            var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+
+            //if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_EMPRESA")))
+            //{
+            //    throw new InvalidOperationException("Seleccione una empresa");
+            //}
+
+            if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_BANCO")))
+            {
+                throw new InvalidOperationException("Seleccione un banco");
+            }
+
+            //if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_CUENTA")))
+            //{
+            //    throw new InvalidOperationException("Seleccione una cuenta");
+            //}
+
+            //var codEmp = dbsEXD_OMCB.GetValueExt("U_COD_EMPRESA");
+            var codBanco = dbsEXD_OMCB.GetValueExt("U_COD_BANCO");
+            //var codCuenta = dbsEXD_OMCB.GetValueExt("U_COD_CUENTA");
+
+            var sqlQry = $"select COUNT('A') from \"@EXD_OMCB\" where U_COD_BANCO = '{codBanco}' ";
+            recSet.DoQuery(sqlQry);
+
+            if (this.UIAPIRawForm.Mode == SAPbouiCOM.BoFormMode.fm_ADD_MODE && Convert.ToInt32(recSet.Fields.Item(0).Value) > 0)
+            {
+                throw new InvalidOperationException("Ya existe un registro para este banco ");
+            }
+
+            if (mtxCodBancs.RowCount == 0)
+            {
+                throw new InvalidOperationException("Registre al menos un código de operación");
+            }
+
+            SaveValid2(ref BubbleEvent);
+            //SaveValid(ref BubbleEvent);
+
+
+        }
+
+        private void SaveValid2(ref bool BubbleEvent)
+        {
             try
             {
+                var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                var sqlQry = "";
+
                 if (this.UIAPIRawForm.Mode == SAPbouiCOM.BoFormMode.fm_FIND_MODE) return;
 
-                var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
-
-                //if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_EMPRESA")))
-                //{
-                //    throw new InvalidOperationException("Seleccione una empresa");
-                //}
-
-                if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_BANCO")))
-                {
-                    throw new InvalidOperationException("Seleccione un banco");
-                }
-
-                //if (string.IsNullOrWhiteSpace(dbsEXD_OMCB.GetValueExt("U_COD_CUENTA")))
-                //{
-                //    throw new InvalidOperationException("Seleccione una cuenta");
-                //}
-
-                //var codEmp = dbsEXD_OMCB.GetValueExt("U_COD_EMPRESA");
-                var codBanco = dbsEXD_OMCB.GetValueExt("U_COD_BANCO");
-                //var codCuenta = dbsEXD_OMCB.GetValueExt("U_COD_CUENTA");
-
-                var sqlQry = $"select COUNT('A') from \"@EXD_OMCB\" where U_COD_BANCO = '{codBanco}' ";
-                recSet.DoQuery(sqlQry);
-
-                if (this.UIAPIRawForm.Mode == SAPbouiCOM.BoFormMode.fm_ADD_MODE && Convert.ToInt32(recSet.Fields.Item(0).Value) > 0)
-                {
-                    throw new InvalidOperationException("Ya existe un registro para este banco ");
-                }
-
-                if (mtxCodBancs.RowCount == 0)
-                {
-                    throw new InvalidOperationException("Registre al menos un código de operación");
-                }
-
                 mtxCodBancs.FlushToDataSource();
+                var codBanDS = dbsEXD_MCB1.GetAsXML();
+                int iContador = 1;
+                XDocument xDoc = null;
+                xDoc = XDocument.Parse(codBanDS);
+                var xElements = xDoc.XPathSelectElements("dbDataSources/rows/row").Where(w => w.Descendants("cell")
+            .Any(a => a.Element("uid").Value.Equals("LineId") && !String.IsNullOrEmpty(a.Element("value").Value)));
+                var ListaFinal = xElements.Descendants("cells").Select((s, i) => new MCB1
+                {
+                    //DocEntry = Convert.ToInt32(s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("DocEntry")).FirstOrDefault()?.Element("value").Value),
+                    LineID = Convert.ToInt32(s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("LineId")).FirstOrDefault()?.Element("value").Value),
+                    Sucursal = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_EMPRESA")).FirstOrDefault()?.Element("value").Value,
+                    CuentaBanco = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_DES_CUENTA")).FirstOrDefault()?.Element("value").Value,
+                    CodigoBanco = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_CUENTA")).FirstOrDefault()?.Element("value").Value,
+                    Moneda = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_MONEDA")).FirstOrDefault()?.Element("value").Value,
+                    Codigo = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_OPE_BANC")).FirstOrDefault()?.Element("value").Value,
+                    Glosa = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_GLOSA")).FirstOrDefault()?.Element("value").Value,
+                    Proyecto = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_PROYECTO")).FirstOrDefault()?.Element("value").Value,
+                    Etapa = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_DIM1")).FirstOrDefault()?.Element("value").Value,
+                    SubEtapa = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_DIM2")).FirstOrDefault()?.Element("value").Value,
+                    CodigoPartPres = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_PARPRE")).FirstOrDefault()?.Element("value").Value,
+                    NombrePartPres = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_NOM_PARPRE")).FirstOrDefault()?.Element("value").Value,
+                    CuentaContable = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_NRO_CUENTA")).FirstOrDefault()?.Element("value").Value,
+                    CentroCosto = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_DIM3")).FirstOrDefault()?.Element("value").Value,
+                    CentroGestion = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_DIM4")).FirstOrDefault()?.Element("value").Value,
+                    MedioPago = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_COD_MPTRABAN")).FirstOrDefault()?.Element("value").Value,
+                    //CrearConta = s.Descendants("cell").Where(w => w.Element("uid").Value.Equals("U_EXX_ADCT_GODD")).FirstOrDefault()?.Element("value").Value,
+
+                    LineaGrilla = i + 1
+                });
+
+                //VALIDACION DE VACIOS
+                Application.SBO_Application.SetStatusWarningMessage("Validación de vacíos");
+                //Application.SBO_Application.SetStatusWarningMessage(ListaFinal.Count().ToString());
+
+                int valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.Sucursal)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre una sucursal");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.CuentaBanco)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre una cuenta de banco");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.Glosa)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Ingrese una glosa");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.Proyecto)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un proyecto");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.Etapa)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre una etapa");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.SubEtapa)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre una sub etapa");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.CodigoPartPres)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un código de partida");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.NombrePartPres)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un nombre de partida");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.CuentaContable)).Count();
+                //Application.SBO_Application.SetStatusWarningMessage(valid.ToString());
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un número de cuenta");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.CentroCosto)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un centro de costo");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.CentroGestion)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un centro de gestión");
+
+                valid = ListaFinal.Where(t => string.IsNullOrEmpty(t.MedioPago)).Count();
+                if (valid > 0)
+                    throw new InvalidOperationException("Registre un medio de pago de transferencia");
+
+                //VALIDACION DE DUPLICADOS
 
 
+                // Verificar duplicados en la propiedad ID
+                var duplicados = ListaFinal
+                    .GroupBy(x => new { x.Sucursal, x.CodigoBanco, x.Codigo, x.Glosa }) // Agrupa por ID
+                    .Where(g => g.Count() > 1) // Filtra los grupos con más de un elemento
+                    .Select(g => g.Key) // Selecciona los valores duplicados
+                    .ToList();
+
+                if (duplicados.Any())
+                {
+                    //Console.WriteLine("Se encontraron duplicados en la propiedad ID:");
+                    foreach (var id in duplicados)
+                    {
+                        throw new InvalidOperationException("No se permiten duplicados en la matriz.(código) - " + id.Sucursal + " - " + id.CodigoBanco + " - " + id.Codigo + " - " + id.Glosa + " - ");
+                    }
+                }
+
+
+                // Obtener el valor de la celda que quieres validar (supongamos que es la primera columna)
+                //string currentValue1 = ((SAPbouiCOM.ComboBox)mtxCodBancs.Columns.Item("Col_14").Cells.Item(i).Specific).Selected.Value;
+                //string currentValue2 = ((SAPbouiCOM.EditText)mtxCodBancs.Columns.Item("Col_15").Cells.Item(i).Specific).Value;
+                //string currentValue3 = ((SAPbouiCOM.EditText)mtxCodBancs.Columns.Item("Col_0").Cells.Item(i).Specific).Value;
+                //string currentValue4 = ((SAPbouiCOM.EditText)mtxCodBancs.Columns.Item("Col_1").Cells.Item(i).Specific).Value;
+
+
+                //Grabar Code
+                if (this.UIAPIRawForm.Mode == SAPbouiCOM.BoFormMode.fm_ADD_MODE)
+                {
+                    if (this.GetCompany().DbServerType == SAPbobsCOM.BoDataServerTypes.dst_HANADB)
+                        sqlQry = "select 'CB'||right('000000' || ltrim(right(coalesce(max(\"Code\"),'0'),6)+1),6) as \"Codigo\" from \"@EXD_OMCB\"";
+                    else
+                        sqlQry = "select 'CB'+right('000000' + ltrim(right(coalesce(max(\"Code\"),0),6)+1),6) as \"Codigo\" from \"@EXD_OMCB\"";
+
+                    recSet.DoQuery(sqlQry);
+                    if (!recSet.EoF)
+                    {
+                        dbsEXD_OMCB.SetValueExt("Code", recSet.Fields.Item(0).Value.ToString());
+                        dbsEXD_OMCB.SetValueExt("Name", recSet.Fields.Item(0).Value.ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Application.SBO_Application.SetStatusErrorMessage(ex.Message);
+                //Application.SBO_Application.SetStatusErrorMessage(ex.StackTrace);
+                BubbleEvent = false;
+            }
+
+
+        }
+        private void SaveValid(ref bool BubbleEvent)
+        {
+            try
+            {
+                var recSet = (SAPbobsCOM.Recordset)this.GetCompany().GetBusinessObject(SAPbobsCOM.BoObjectTypes.BoRecordset);
+                var sqlQry = "";
+                mtxCodBancs.FlushToDataSource();
 
 
                 for (int i = 0; i < mtxCodBancs.VisualRowCount; i++)
@@ -304,7 +461,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                         }
                     }
 
-                  
+
                     if (string.IsNullOrWhiteSpace(((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_12", i + 1)).Value))
                     {
                         ((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_12", i + 1)).Active = true;
@@ -334,7 +491,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                     {
                         ((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_2", i + 1)).Active = true;
                         throw new InvalidOperationException("Registre un número de cuenta");
-                    }                 
+                    }
                     if (string.IsNullOrWhiteSpace(((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_7", i + 1)).Value))
                     {
                         ((SAPbouiCOM.EditText)mtxCodBancs.GetCellSpecific("Col_7", i + 1)).Active = true;
@@ -387,7 +544,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                                     throw new InvalidOperationException("No se permiten duplicados en la matriz.(código) - Revisar línea " + i + " y la línea " + j);
                                 }
                             }
-                          
+
 
                             if (currentValue1 == compareValue1 && compareValue2 == currentValue2 && currentValue4 == compareValue4)
                             {
@@ -409,7 +566,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                 //    throw new InvalidOperationException("Ya se ha registrado este codigo de operación");
                 //}
 
-               
+
 
                 //throw new InvalidOperationException("Error pde pruebas");
 
@@ -435,7 +592,6 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                 BubbleEvent = false;
             }
         }
-
         private void Form_DataLoadAfter(ref SAPbouiCOM.BusinessObjectInfo pVal)
         {
             //cmbEmpresas.Item.Enabled = false;
@@ -453,7 +609,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                 //cmbBancos.LoadValidValues(recSet);
 
                 //mtxCodBancs.Columns.Item("Col_14").DisplayDesc = true;
-                
+
                 //Application.SBO_Application.SetStatusWarningMessage("inicio");
                 mtxCodBancs.Columns.Item("Col_14").DisplayDesc = true;
                 if (mtxCodBancs.RowCount > 0)
@@ -523,9 +679,9 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
             }
             catch (Exception ex)
             {
-                Application.SBO_Application.SetStatusErrorMessage(ex.Message+" - "+ex.InnerException);
+                Application.SBO_Application.SetStatusErrorMessage(ex.Message + " - " + ex.InnerException);
             }
-            
+
 
             // cargo cuentas
             //var codBnc = dbsEXD_OMCB.GetValueExt("U_COD_BANCO");
@@ -618,7 +774,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
 
                     //}
                     ////comboBoxCuenta.ValidValues.Add(" ", "");
-               
+
 
                     //while (!recSet.EoF)
                     //{
@@ -628,9 +784,9 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                     //    recSet.MoveNext();
                     //}
 
-                    
 
-                    
+
+
 
                 }
                 if (pVal.ColUID == "Col_15")
@@ -638,7 +794,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                     //SAPbouiCOM.ComboBox comboBoxCuenta = (SAPbouiCOM.ComboBox)mtxCodBancs.Columns.Item("Col_15").Cells.Item(pVal.Row).Specific;
                     //SAPbouiCOM.ComboBox comboBoxEmpresa = (SAPbouiCOM.ComboBox)mtxCodBancs.Columns.Item("Col_14").Cells.Item(pVal.Row).Specific;
                     //SAPbouiCOM.EditText moneda = (SAPbouiCOM.EditText)mtxCodBancs.Columns.Item("Col_16").Cells.Item(pVal.Row).Specific;
-                
+
 
                     //var codEmp = comboBoxEmpresa.Selected.Value;
                     //var codCta = comboBoxCuenta.Selected.Value;
@@ -676,7 +832,7 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
                 //Application.SBO_Application.SetStatusWarningMessage("Form_LoadAfter");
                 //mtxCodBancs.Columns.Item("Col_14").DisplayDesc = true;
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 Application.SBO_Application.SetStatusErrorMessage(ex.Message);
             }
@@ -712,18 +868,18 @@ namespace EXX_IMG_GastosBancarios.Presentation.Forms
 
                         }
                     }
-                   
+
 
                 }
 
-              
+
 
 
             }
             catch (Exception ex)
             {
                 Application.SBO_Application.SetStatusErrorMessage(ex.Message);
-                
+
             }
 
         }

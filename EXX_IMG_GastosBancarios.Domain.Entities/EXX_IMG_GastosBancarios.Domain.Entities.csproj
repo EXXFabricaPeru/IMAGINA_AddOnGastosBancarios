@@ -62,6 +62,7 @@
     <Compile Include="BF\FormattedSearchDto.cs" />
     <Compile Include="ErrorSLModel.cs" />
     <Compile Include="ExternalReconciliationSL.cs" />
+    <Compile Include="MCB1.cs" />
     <Compile Include="OperacionDto.cs" />
     <Compile Include="PaymentSL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
